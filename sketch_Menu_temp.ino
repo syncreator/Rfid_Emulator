@@ -1,6 +1,7 @@
 #include <avr/pgmspace.h>
 #include <MsTimer2.h>
 #include <Button.h>
+#include <EEPROM.h> // подключаем библиотеку EEPROM
 
 #include <OLED_I2C.h>
 #define LED_1_PIN    9   // светодиод подключен к выводу 9
@@ -109,26 +110,6 @@ static const MENU MStruct [COUNT]PROGMEM=
   T_APP, 6, 8, 0,       //15 Exit to Maine Menu
 };
 
-/*static const MENU MStruct [COUNT]PROGMEM=
-{
-  T_FOLDER, 0, 1, 8, "Main_Menu",               //0 "Root"(ROOT FILE)
-  T_APP, 0, 1, 0, "Key_Capture",                //1 "Key_Capture" Catch app
-  T_DFOLDER, 0, 9, NUM, "Key_Emulate",          //2 "Key_Emulate" Key folder
-  T_APP, 0, 2, 0,  "Torch",                     //3 "Torch" flashlight app
-  T_APP, 0, 3, 0,  "Watch",                     //4 "Watch" Clock app
-  T_DFOLDER, 0, 10, NUM, "Music",               //5 "Music" Melody app
-  T_FOLDER, 0, 11, 5, "Config_menu",            //6 "Config" 4-Configs
-  T_APP, 0, 4, 0, "Sleep",                      //7 "Sleep" Sleep app
-  T_APP, 0, 5, 0, "Exit",                       //8 "Exit" Exit to Clock app
-  T_APP, 2, 6, 0, "Key#",                //9 "Key_N" Key app folder
-  T_APP, 5, 7, 0, "Melody#",             //10 "Melody_N" app folder musik
-  T_CONFIG, 6, 1, 0, "Torch_Config",     //11 flashlights config
-  T_CONFIG, 6, 2, 0, "Watch_Config",     //12 Watch-clock Config
-  T_CONFIG, 6, 3, 0, "Capture_Config",   //13 Catch Config
-  T_CONFIG, 6, 4, 0, "Emulate_Config",   //14 Key Emulate Config
-  T_APP, 6, 8, 0,    "Exit"              //15 Exit to Maine Menu
-};*/
-
 //массив лимитов и значений по умолчанию конфигов меню.
 static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
   T_1, 180, 4,  //0 Time_Emulate
@@ -184,6 +165,10 @@ void setup()
   fix(3,1);
   myOLED.update();
   delay(10);
+  //// EEPROM for ConfigLimits
+  for(byte i=0;i<=10;i++)
+  if (EEPROM[i]==255 || EEPROM[i]>ConfigLim[i].c_max)EEPROM.update(i,ConfigLim[i].def);
+  
 }
 
 void loop()
