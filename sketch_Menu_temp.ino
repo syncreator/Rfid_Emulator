@@ -401,13 +401,18 @@ if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление �
       myOLED.print(plr(CName,(sum+y-1)), CENTER, 17 + i * 10 );//вызов массива названий для параметров конфигов
      switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
       {
-        case 1: Pacman();//Key_cap();
+        case 0: myOLED.printNumI(y, 99, 17 + i * 10);//Т_1
+                myOLED.print(':', 109, 17 + i * 10);
+                myOLED.printNumI(y, 112, 17 + i * 10);
           break;
-        case 2: Pacman();//Torch();
+        case 1: myOLED.printNumI(y, 99, 17 + i * 10);//Т_2
+                myOLED.print(':', 109, 17 + i * 10);
+                myOLED.printNumI(y, 112, 17 + i * 10);
           break;
-        case 3: Pacman();//Watch();
+        case 2: if(((uint8_t)pgm_read_word(&(ConfigLim[x].def))) myOLED.print("on", 109, 17 + i * 10);//BOOL
+                myOLED.print("oFF", 109, 17 + i * 10);
           break;
-        case 4: Pacman();//Sleep();
+        case 3: Pacman();//INT
           break;
      }
       ++i;
