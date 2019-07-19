@@ -390,15 +390,26 @@ myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
 myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
 myOLED.drawRoundRect(1, 0, 17, 13);
 myOLED.drawRoundRect(110, 0, 127, 13);
-myOLED.print(plr(MENU_N,(g+t))/*(char*)pgm_read_word(&(MStruct[m].f_name))*/, CENTER, 0);//Заголовок
-myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенного пункта меню
- //int y(0), g=(uint8_t)pgm_read_word(&(MStruct[m].id_dot)), //номер дочерней папки в меню
- //               s =(uint8_t)pgm_read_word(&(MStruct[m].f_num)) ;  //кол-во файлов в папке
-  //if (s<(T+i))y=T+i-s;else y=T+i;
+myOLED.print(plr(MENU_N,(g+t)), CENTER, 0);//Заголовок
+if(Config_flag==1)myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
+if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
+ 
+
   while (i < ((s < PX) ? s : PX))
     {if (s<(_tes+i))y=_tes+i-s;else y=_tes+i;
       myOLED.printNumI(y, 3, 17 + i * 10);
-      myOLED.print(plr(CName,(sum+y-1))/*(char*)pgm_read_word(&(KeyName[y-1]))*/, CENTER, 17 + i * 10 );//вызов массива названий для параметров конфигов
+      myOLED.print(plr(CName,(sum+y-1)), CENTER, 17 + i * 10 );//вызов массива названий для параметров конфигов
+     switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
+      {
+        case 1: Pacman();//Key_cap();
+          break;
+        case 2: Pacman();//Torch();
+          break;
+        case 3: Pacman();//Watch();
+          break;
+        case 4: Pacman();//Sleep();
+          break;
+     }
       ++i;
     };
  
