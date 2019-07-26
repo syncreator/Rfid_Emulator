@@ -169,10 +169,21 @@ void setup()
   for(byte i=0;i<=10;i++)
   if (EEPROM[i]==255 || EEPROM[i]>ConfigLim[i].c_max)EEPROM.update(i,ConfigLim[i].def);
   
+  Serial.begin(9600); // инициализация послед. порта
+  
 }
 
 void loop()
 {
+  //Отработка монитора посл. порта:
+  for (int addr=0; addr<1024; addr++) { // для всех ячеек памяти (для Arduino UNO 1024)
+    byte val = EEPROM[addr];//EEPROM.read(addr); // считываем 1 байт по адресу ячейки
+    Serial.print(addr); // выводим адрес в послед. порт 
+    Serial.print("\t"); // табуляция
+    Serial.println(val); // выводим значение в послед. порт
+  }
+  delay(60000); // задержка 1 мин
+  //Конец отработки монитора посл. порта:)
   if ( button1.flagClick == true ) {
     // был клик кнопки
     button1.flagClick = false;        // сброс признака
