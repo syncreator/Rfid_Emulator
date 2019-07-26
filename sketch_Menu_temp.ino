@@ -359,18 +359,9 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
       myOLED.printNumI(y, 3, 17 + i * 10);
       myOLED.print(plr(MENU_N,(g+y-1))/*(char*)pgm_read_word(&(MStruct[g+y-1].f_name))*/, CENTER, 17 + i * 10);//вызов массива названий основного списка меню
       ++i;
-    };}
-   /* myOLED.print("_Pos=", CENTER, 10);
-  myOLED.printNumI(t, 62, 22);
-  myOLED.print("_Menu=", CENTER,38 );
- // myOLED.printNumI(_Menu, 62, 50);
-  //myOLED.print("file_#", 3, 57);
-  myOLED.printNumI(t, 3, 57);
-  //  myOLED.print(P, 45, 57);
- // myOLED.print("file_sum", 63, 57);
-  myOLED.printNumI(m, 63, 57);
-  //  myOLED.print(s, 113, 57);*/
-  myOLED.update();
+    };
+     }
+   myOLED.update();
 } 
 /////////////
 int Config_app()
@@ -400,20 +391,20 @@ if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление �
       myOLED.printNumI(y, 3, 17 + i * 10); //прорисовка номера пункта параметра конфига
       myOLED.print(plr(CName,(sum+y-1)), CENTER, 17 + i * 10 );//вызов массива названий для параметров конфигов
      if(y<s-1)//условие попадания на строку с названием параметра(строка Exit игнорируется)
-     switch (((uint8_t)pgm_read_word(&(ConfigLim[sum+y-(_Pos-1)].type))))//прорисовка текущих значений параметров конфигов
+     switch (((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].type))))//прорисовка текущих значений параметров конфигов
       {
-        case 0: myOLED.printNumI(time1(1,sum+y-(_Pos-1)), 99, 17 + i * 10);//Т_1
+        case 0: myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_1
                 myOLED.print(':', 109, 17 + i * 10);
-                myOLED.printNumI(time1(2,sum+y-(_Pos-1)), 112, 17 + i * 10);
+                myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);
           break;
-        case 1: myOLED.printNumI(time1(1,sum+y-(_Pos-1)), 99, 17 + i * 10);//Т_2
+        case 1: myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_2
                 myOLED.print(':', 109, 17 + i * 10);
-                myOLED.printNumI(time1(2,sum+y-(_Pos-1)), 112, 17 + i * 10);
+                myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);
           break;
-        case 2: if(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-(_Pos-1)].def)))) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
+        case 2: if(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].def)))) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
                     else myOLED.print("off", 109, 17 + i * 10);
           break;
-        case 3: myOLED.printNumI(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-(_Pos-1)].def))), 109, 17 + i * 10);//INT
+        case 3: myOLED.printNumI(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].def))), 109, 17 + i * 10);//INT
           break;
      }
       ++i;
