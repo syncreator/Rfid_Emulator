@@ -84,7 +84,7 @@ void Pacman();
 void Menu();
 void List_menu(int,int);
 int Config_app();
-void destr(byte, int*);
+void destr(byte, int);
 int constr(byte);
 
 void Enter_render();
@@ -169,7 +169,7 @@ void setup()
   delay(10);
   //// EEPROM for ConfigLimits
   for(byte i=0;i<=10;i++)
-  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || EEPROM[i]>ConfigLim[i].c_max)EEPROM.update(i,ConfigLim[i].def);
+  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || constr(i)>ConfigLim[i].c_max)destr(i,ConfigLim[i].def);
   
   Serial.begin(9600); // инициализация послед. порта
   
@@ -377,7 +377,7 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
    myOLED.update();
 } 
 /////////////
-void destr(byte i, int* x)//трансляция int x в два байтовых ЕЕПРОМА
+void destr(byte i, int x)//трансляция int x в два байтовых ЕЕПРОМА
 {//byte j=i*2;
  if(х>50879)return (0);//проверка на мах допустивый размер числа
  EEPROM.update(i*2,x/255);
