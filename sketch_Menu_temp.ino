@@ -389,8 +389,9 @@ int constr(byte i)//Сборка int числа из двух байтов ЕЕ�
   return (EEPROM[i*2]*255+EEPROM[i*2+1])
 }
 ////////////
-int Config_app()
+int Config_app(byte f=0)
 { static int _val; //переменная буфер для хранения промежуточного значения редактируемого параметра
+ if (f!=0) _val=EEPROM[?]
   uint8_t i,j,t,sum(0);//_tes(1);//переменная для определения текущей позиции в списке параметров выбранного конфига
     i=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot));//id дочерней папки- для конфигов =11
     j=t=_Pos;
@@ -407,10 +408,11 @@ myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
 myOLED.drawRoundRect(1, 0, 17, 13);
 myOLED.drawRoundRect(110, 0, 127, 13);
 myOLED.print(plr(MENU_N,(g+t)), CENTER, 0);//Заголовок
-if(Config_flag==1)myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
-if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
- 
-
+if(Config_flag==1){myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
+                   _val=EEPROM[sum+_tes-1-(_Pos-1)];}//сохраняем текущее значение конфига в _val
+if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
+                 if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].c_max)))) _val++;
+                  else _val=0;}//прибавляем 1 к _val пока не достигнет MAX значения 
   while (i < ((s < PX) ? s : PX))
     {if (s<(_tes+i))y=_tes+i-s;else y=_tes+i;
       myOLED.printNumI(y, 3, 17 + i * 10); //прорисовка номера пункта параметра конфига
@@ -418,18 +420,27 @@ if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление �
      if(y<s-1)//условие попадания на строку с названием параметра(строка Exit игнорируется)
      switch (((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].type))))//прорисовка текущих значений параметров конфигов
       {
-        case 0: myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_1
-                myOLED.print(':', 109, 17 + i * 10);
-                myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);
+        case 0: if(Config_flag==2){myOLED.printNumI(_val/60, 99, 17 + i * 10);//Т_1
+                    myOLED.print(':', 109, 17 + i * 10);
+                    myOLED.printNumI(_val%60, 112, 17 + i * 10);}
+                    else{myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_1
+                    myOLED.print(':', 109, 17 + i * 10);
+                    myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);}
           break;
-        case 1: myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_2
-                myOLED.print(':', 109, 17 + i * 10);
-                myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);
+        case 1: if(Config_flag==2){myOLED.printNumI(_val/60, 99, 17 + i * 10);//Т_2
+                    myOLED.print(':', 109, 17 + i * 10);
+                    myOLED.printNumI(_val%60, 112, 17 + i * 10);}
+                    else {myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_2
+                    myOLED.print(':', 109, 17 + i * 10);
+                    myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);}
           break;
-        case 2: if(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].def)))) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
-                    else myOLED.print("off", 109, 17 + i * 10);
+        case 2: if(Config_flag==2){if(_val) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
+                    else myOLED.print("off", 109, 17 + i * 10);}
+                 else {if(constr(sum+y-1-(_Pos-1))) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
+                    else myOLED.print("off", 109, 17 + i * 10);}
           break;
-        case 3: myOLED.printNumI(((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].def))), 109, 17 + i * 10);//INT
+        case 3: if(Config_flag==2)myOLED.printNumI(_val, 109, 17 + i * 10);
+                 else myOLED.printNumI(constr(sum+y-1-(_Pos-1)), 109, 17 + i * 10);//INT
           break;
      }
       ++i;
