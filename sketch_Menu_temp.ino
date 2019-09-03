@@ -505,11 +505,11 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
  }
 
  void Arow_render()
-     {if(Config_flag!=0)//????
+     {if(Config_flag)//????
        {// if(Launch_APP!=0)return(0);//????
-        int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));
-        ((_tes<((uint8_t)pgm_read_word(&(MStruct[g+_Pos].f_num))))?_tes++:_tes=1);
-       myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);
+        int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//номер дочерней папки
+        if(Config_flag==1)((_tes<((uint8_t)pgm_read_word(&(MStruct[g+_Pos].f_num))))?_tes++:_tes=1);//если кол-во файлов в текущей папке>_tes то..
+       myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);//блымка иконки кнопки ->
            myOLED.update();
            delay(50);
        Config_app();
