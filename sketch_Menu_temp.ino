@@ -391,7 +391,6 @@ int constr(byte i)//Сборка int числа из двух байтов ЕЕ�
 ////////////
 int Config_app(byte f=0)
 { static int _val; //переменная буфер для хранения промежуточного значения редактируемого параметра
- if (f!=0) _val=EEPROM[?]
   uint8_t i,j,t,sum(0);//_tes(1);//переменная для определения текущей позиции в списке параметров выбранного конфига
     i=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot));//id дочерней папки- для конфигов =11
     j=t=_Pos;
@@ -401,6 +400,11 @@ int Config_app(byte f=0)
  i=0;
  int y(0), g=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)), //номер дочерней папки в меню
            s =(uint8_t)pgm_read_word(&(MStruct[g+t].f_num)) ;  //кол-во файлов в папке??? в индекс масива -1 надо?
+ //обработка EEPROM данных
+ if (f==1) _val=constr(sum+_tes-1-(_Pos-1));//сохраняем текущее значение конфига в _val
+ if (f==2) {if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].c_max)))) _val++;
+                  else _val=0;}//прибавляем 1 к _val пока не достигнет MAX значения 
+ if (f==3) destr(sum+_tes-1-(_Pos-1),_val);// сохраняем _val в EEPROM
  /// прорисовка графики
  myOLED.clrScr();
 myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
@@ -408,11 +412,9 @@ myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
 myOLED.drawRoundRect(1, 0, 17, 13);
 myOLED.drawRoundRect(110, 0, 127, 13);
 myOLED.print(plr(MENU_N,(g+t)), CENTER, 0);//Заголовок
-if(Config_flag==1){myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
-                   _val=EEPROM[sum+_tes-1-(_Pos-1)];}//сохраняем текущее значение конфига в _val
-if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
-                 if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].c_max)))) _val++;
-                  else _val=0;}//прибавляем 1 к _val пока не достигнет MAX значения 
+if(Config_flag==1)myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
+if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
+                 
   while (i < ((s < PX) ? s : PX))
     {if (s<(_tes+i))y=_tes+i-s;else y=_tes+i;
       myOLED.printNumI(y, 3, 17 + i * 10); //прорисовка номера пункта параметра конфига
@@ -490,7 +492,7 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
       if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_CONFIG)
       {Config_flag=1;
        ...
-         ((Config_flag=1)?{Config_flag++;Config_app(1)}:Config_flag--;EEPROM.update(Config_app());)//смена значения Config_flag по нажатию ENTER
+         ((Config_flag=1)?{Config_flag++;Config_app(1)}:{Config_flag--;Config_app(3)})//EEPROM.update(i, Config_app());)//смена значения Config_flag по нажатию ENTER
      /* switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
       {
         case 1: Config_app();//Config_1();
@@ -514,7 +516,7 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
        myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);//блымка иконки кнопки ->
            myOLED.update();
            delay(50);
-       if(Config_flag==2)Config_app(2);else Config_app(2);
+       if(Config_flag==2)Config_app(2);else Config_app();
        }
        else{((_Pos<((uint8_t)pgm_read_word(&(MStruct[_Menu].f_num))))?_Pos++:_Pos=1);
        if(_Menu==0)Menu();
