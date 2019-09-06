@@ -489,7 +489,9 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
       };
       if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_CONFIG)
       {Config_flag=1;
-      switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
+       ...
+         ((Config_flag=1)?{Config_flag++;Config_app(1)}:Config_flag--;EEPROM.update(Config_app());)//смена значения Config_flag по нажатию ENTER
+     /* switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
       {
         case 1: Config_app();//Config_1();
           break;
@@ -499,7 +501,7 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
           break;
         case 4: Config_app();///Config_4();
           break;
-        };//функция редактирования конфигов-принимает номер выбранного конфига???????
+        };*///функция редактирования конфигов-принимает номер выбранного конфига???????
       };
     }
  }
@@ -512,7 +514,7 @@ if(Config_flag==2){myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление 
        myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);//блымка иконки кнопки ->
            myOLED.update();
            delay(50);
-       Config_app();
+       if(Config_flag==2)Config_app(2);else Config_app(2);
        }
        else{((_Pos<((uint8_t)pgm_read_word(&(MStruct[_Menu].f_num))))?_Pos++:_Pos=1);
        if(_Menu==0)Menu();
