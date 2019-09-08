@@ -1,7 +1,7 @@
 #include <avr/pgmspace.h>
 #include <MsTimer2.h>
 #include <Button.h>
-#include <EEPROM.h> // подключаем библиотеку EEPROM
+#include <EEPROM.h>
 
 #include <OLED_I2C.h>
 #define LED_1_PIN    9   // светодиод подключен к выводу 9
@@ -50,7 +50,7 @@ extern uint8_t pacman2[];
 extern uint8_t pacman3[];
 extern uint8_t pill[];
 
-volatile int _Menu(0),_Pos(1),_tes(1),Config_flag(0),Launch_APP(0); //_Pos нумеруется с 1!!!
+volatile int _Menu(0),_Pos(1),_tes(1),Config_flag(0);//,Launch_APP(0); //_Pos нумеруется с 1!!!
 //char ti[] = "<>"; //вспомоательный массив для добавления ковычек в заголовок
 uint8_t* bm;
 int pacy;
@@ -83,7 +83,7 @@ void fix(int, int);
 void Pacman();
 void Menu();
 void List_menu(int,int);
-int Config_app();
+void Config_app();
 void destr(byte, int);
 int constr(byte);
 
@@ -111,6 +111,7 @@ static const MENU MStruct [COUNT]PROGMEM=
   T_CONFIG, 6, 4, 6,    //14 Torch_Config
   T_APP, 6, 8, 0,       //15 Exit to Maine Menu
 };
+
 
 //массив лимитов и значений по умолчанию конфигов меню.
 static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
@@ -169,23 +170,22 @@ void setup()
   delay(10);
   //// EEPROM for ConfigLimits
   for(byte i=0;i<=10;i++)
-  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || constr(i)>ConfigLim[i].c_max)destr(i,ConfigLim[i].def);
-  
+  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || constr(i)>((uint8_t)pgm_read_word(&(ConfigLim[i].c_max))))
+  destr(i,(uint8_t)pgm_read_word(&(ConfigLim[i].def)));
   Serial.begin(9600); // инициализация послед. порта
-  
+  /*//Отработка монитора посл. порта:
+  for (int addr=0; addr<50; addr++) { // для всех ячеек памяти (для Arduino UNO 1024)
+    byte val =EEPROM.read(addr); // считываем 1 байт по адресу ячейки
+    Serial.print(addr);
+    Serial.print("\t");// выводим адрес в послед. порт 
+    Serial.println(val,DEC); // выводим значение в послед. порт
+  }
+  delay(6000); // задержка 1 мин
+  //Конец отработки монитора посл. порта:)*/
 }
 
 void loop()
 {
-  //Отработка монитора посл. порта:
-  for (int addr=0; addr<1024; addr++) { // для всех ячеек памяти (для Arduino UNO 1024)
-    byte val = EEPROM[addr];//EEPROM.read(addr); // считываем 1 байт по адресу ячейки
-    Serial.print(addr); // выводим адрес в послед. порт 
-    Serial.print("\t"); // табуляция
-    Serial.println(val); // выводим значение в послед. порт
-  }
-  delay(60000); // задержка 1 мин
-  //Конец отработки монитора посл. порта:)
   if ( button1.flagClick == true ) {
     // был клик кнопки
     button1.flagClick = false;        // сброс признака
@@ -283,7 +283,7 @@ void fix(int n, int x)//n-количество раз отрисовки ико�
   }
 }
 //Добавляет кавычки<> в строку
-char* buf(char *a, char* b)
+/*char* buf(char *a, char* b)
 { byte i(1);
   //char b[]="<>";
   while ((b[i] = a[i - 1]) != '\0')
@@ -291,7 +291,7 @@ char* buf(char *a, char* b)
   b[i] = '>';
   b[++i] = '\0';
   return b;
-}
+}*/
 //Распаковщик для наименований меню
 char* plr(char* s, int i)
 { int n, j,x(0), k;
@@ -302,7 +302,7 @@ char* plr(char* s, int i)
   for (n = 0,j=0,k=0; (n < strlen_P(s))&&(i>=j); n++)
   {
      if(pgm_read_byte_near(s + n)==' ')j++;
-     if(i==j)b[k++]=pgm_read_byte_near(s + n);}
+     if((i==j)&& (pgm_read_byte_near(s + n)!=' '))b[k++]=pgm_read_byte_near(s + n);}
   /*for (n=0;(pgm_read_byte_near(s)!= '\0')&&(i>n);s++)
     if(pgm_read_byte_near(s)==' ')n++;
   for (j=0;(pgm_read_byte_near(s)!= '\0')&&(pgm_read_byte_near(s)!=' ');s++,j++)
@@ -372,37 +372,47 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
       myOLED.printNumI(y, 3, 17 + i * 10);
       myOLED.print(plr(MENU_N,(g+y-1))/*(char*)pgm_read_word(&(MStruct[g+y-1].f_name))*/, CENTER, 17 + i * 10);//вызов массива названий основного списка меню
       ++i;
-    };
-     }
-   myOLED.update();
+    };}
+   /* myOLED.print("_Pos=", CENTER, 10);
+  myOLED.printNumI(t, 62, 22);
+  myOLED.print("_Menu=", CENTER,38 );
+ // myOLED.printNumI(_Menu, 62, 50);
+  //myOLED.print("file_#", 3, 57);
+  myOLED.printNumI(t, 3, 57);
+  //  myOLED.print(P, 45, 57);
+ // myOLED.print("file_sum", 63, 57);
+  myOLED.printNumI(m, 63, 57);
+  //  myOLED.print(s, 113, 57);*/
+  myOLED.update();
 } 
 /////////////
 void destr(byte i, int x)//трансляция int x в два байтовых ЕЕПРОМА
 {//byte j=i*2;
- if(х>50879)return (0);//проверка на мах допустивый размер числа
+ if(x>50879)return;//проверка на мах допустивый размер числа
  EEPROM.update(i*2,x/255);
  EEPROM.update(i*2+1,x%255);
 }
 ////////////
 int constr(byte i)//Сборка int числа из двух байтов ЕЕПРОМА
 {
-  return (EEPROM[i*2]*255+EEPROM[i*2+1])
+  return (EEPROM[i*2]*255+EEPROM[i*2+1]);
 }
 ////////////
-int Config_app(byte f=0)
-{ static int _val; //переменная буфер для хранения промежуточного значения редактируемого параметра
+int Config_app(int f=0)
+{// 
+  static int _val; //переменная буфер для хранения промежуточного значения редактируемого параметра
   uint8_t i,j,t,sum(0);//_tes(1);//переменная для определения текущей позиции в списке параметров выбранного конфига
-    i=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot));//id дочерней папки- для конфигов =11
+    i=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot));//i=11
     j=t=_Pos;
  while(j>1)
  {sum+=((uint8_t)pgm_read_word(&(MStruct[i++].f_num)));//вычисляем добавку к _tes? для правильной навигации по конфиг структуре и масиву названий параметров
  j--;}
  i=0;
  int y(0), g=(uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)), //номер дочерней папки в меню
-           s =(uint8_t)pgm_read_word(&(MStruct[g+t].f_num)) ;  //кол-во файлов в папке??? в индекс масива -1 надо?
+           s =(uint8_t)pgm_read_word(&(MStruct[g+t-1].f_num));  //кол-во файлов в папке
  //обработка EEPROM данных
  if (f==1) _val=constr(sum+_tes-1-(_Pos-1));//сохраняем текущее значение конфига в _val
- if (f==2) {if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].c_max)))) _val++;
+ if (f==2) {if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+_tes-1-(_Pos-1)].c_max)))) _val++;
                   else _val=0;}//прибавляем 1 к _val пока не достигнет MAX значения 
  if (f==3) destr(sum+_tes-1-(_Pos-1),_val);// сохраняем _val в EEPROM
  /// прорисовка графики
@@ -411,43 +421,48 @@ myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
 myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
 myOLED.drawRoundRect(1, 0, 17, 13);
 myOLED.drawRoundRect(110, 0, 127, 13);
-myOLED.print(plr(MENU_N,(g+t)), CENTER, 0);//Заголовок
-if(Config_flag==1)myOLED.drawRoundRect(1, 15, 96, 26);//Обрамление выделенного пункта меню
-if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление редактируемого параметра конфига
-                 
+myOLED.print(plr(MENU_N,(g+t-1)), CENTER, 0);//Заголовок
+if(Config_flag==1)myOLED.drawRoundRect(1, 15, 89, 26);//Обрамление выделенного пункта меню                 
+if(Config_flag==2)myOLED.drawRoundRect(90, 15, 127, 26);//Обрамление редактируемого параметра конфига
+myOLED.printNumI(_Pos, 3, 57);
+myOLED.printNumI(_tes, 20, 57);
+myOLED.printNumI(sum, 38, 57);
+myOLED.printNumI(Config_flag, 56, 57);
+
+
   while (i < ((s < PX) ? s : PX))
     {if (s<(_tes+i))y=_tes+i-s;else y=_tes+i;
-      myOLED.printNumI(y, 3, 17 + i * 10); //прорисовка номера пункта параметра конфига
-      myOLED.print(plr(CName,(sum+y-1)), CENTER, 17 + i * 10 );//вызов массива названий для параметров конфигов
-     if(y<s-1)//условие попадания на строку с названием параметра(строка Exit игнорируется)
-     switch (((uint8_t)pgm_read_word(&(ConfigLim[sum+y-1-(_Pos-1)].type))))//прорисовка текущих значений параметров конфигов
+      myOLED.printNumI(y, 3, 17 + i * 10);//пишем номер строки
+      myOLED.print(plr(CName,(sum+y-1)),15, 17 + i * 10 );//вызов массива названий для параметров конфигов
+      if(y<=(s-1))//условие попадания на строку с названием параметра(строка Exit игнорируется)
+     switch ((uint8_t)pgm_read_word(&(ConfigLim[sum+y-(_Pos-1)-1].type)))//прорисовка текущих значений параметров конфигов
       {
-        case 0: if(Config_flag==2){myOLED.printNumI(_val/60, 99, 17 + i * 10);//Т_1
-                    myOLED.print(':', 109, 17 + i * 10);
+         case 0: if(Config_flag==2 && i==0){myOLED.printNumI(_val/60, 92, 17 + i * 10);//Т_1
+                    myOLED.print(":", 106, 17 + i * 10);
                     myOLED.printNumI(_val%60, 112, 17 + i * 10);}
-                    else{myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_1
-                    myOLED.print(':', 109, 17 + i * 10);
-                    myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);}
+                    else{myOLED.printNumI(constr(sum+y-1-(_Pos-1))/60, 92, 17 + i * 10);//Т_1
+                    myOLED.print(":", 106, 17 + i * 10);
+                    myOLED.printNumI(constr(sum+y-1-(_Pos-1))%60, 112, 17 + i * 10);}
           break;
-        case 1: if(Config_flag==2){myOLED.printNumI(_val/60, 99, 17 + i * 10);//Т_2
-                    myOLED.print(':', 109, 17 + i * 10);
+        case 1: if(Config_flag==2 && i==0){myOLED.printNumI(_val/60, 92, 17 + i * 10);//Т_2
+                    myOLED.print(":", 106, 17 + i * 10);
                     myOLED.printNumI(_val%60, 112, 17 + i * 10);}
-                    else {myOLED.printNumI(time1(1,sum+y-1-(_Pos-1)), 99, 17 + i * 10);//Т_2
-                    myOLED.print(':', 109, 17 + i * 10);
-                    myOLED.printNumI(time1(2,sum+y-1-(_Pos-1)), 112, 17 + i * 10);}
+                    else {myOLED.printNumI(constr(sum+y-1-(_Pos-1))/60, 92, 17 + i * 10);//Т_2
+                    myOLED.print(":", 106, 17 + i * 10);
+                    myOLED.printNumI(constr(sum+y-1-(_Pos-1))%60, 112, 17 + i * 10);}
           break;
-        case 2: if(Config_flag==2){if(_val) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
-                    else myOLED.print("off", 109, 17 + i * 10);}
-                 else {if(constr(sum+y-1-(_Pos-1))) myOLED.print("on", 109, 17 + i * 10);//BOOL on/off
-                    else myOLED.print("off", 109, 17 + i * 10);}
+        case 2: if(Config_flag==2 && i==0){if(_val) myOLED.print("on", 102, 17 + i * 10);//BOOL on/off
+                    else myOLED.print("off", 102, 17 + i * 10);}
+                 else {if(constr(sum+y-1-(_Pos-1))) myOLED.print("on", 102, 17 + i * 10);//BOOL on/off
+                    else myOLED.print("off", 102, 17 + i * 10);}
           break;
-        case 3: if(Config_flag==2)myOLED.printNumI(_val, 109, 17 + i * 10);
-                 else myOLED.printNumI(constr(sum+y-1-(_Pos-1)), 109, 17 + i * 10);//INT
+        case 3: if(Config_flag==2 && i==0)myOLED.printNumI(_val, 102, 17 + i * 10);
+                 else myOLED.printNumI(constr(sum+y-1-(_Pos-1)), 102, 17 + i * 10);//INT
           break;
      }
-      ++i;
+     ++i;
     };
- 
+    myOLED.update();
   }
 
  void Enter_render()
@@ -456,16 +471,12 @@ if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление �
            myOLED.update();
            delay(50);
           }
-  if((Config_flag!=0)&&((_Pos==1&&_tes==3)||(_Pos==2&&_tes==2)||(_Pos==3&&_tes==4)||(_Pos==4&&_tes==6)))//выход в меню конфигов при выборе exit в папках параметров конфигов
-  { Config_flag=0;
-    List_menu(_Menu,_Pos);
-  }
   if((_Pos==6&&_Menu==2)||(_Pos==6&&_Menu==5)||(_Pos==5&&_Menu==6))//выход в основное меню при выборе exit в папках
   {_Pos=_Menu; _Menu=0;
     Menu();           
   }        
   else{        
-  int x=((_Menu==2 ||_Menu==5)? 0 :_Pos-1)+((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//поправка для T_DFOLDER папок?
+  int x=((_Menu==2 ||_Menu==5)? 0 :_Pos-1)+((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//x-находим номер текущего файла меню
       if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_APP)
           switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
       {
@@ -489,34 +500,28 @@ if(Config_flag==2)myOLED.drawRoundRect(97, 15, 127, 26);//Обрамление �
        _Pos=1;
        List_menu(_Menu,_Pos);//прорисовка списковых папок: списков ключей, мелодий, конфигов
       };
-      if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_CONFIG)
-      {Config_flag=1;
-       ...
-         ((Config_flag=1)?{Config_flag++;Config_app(1)}:{Config_flag--;Config_app(3)})//EEPROM.update(i, Config_app());)//смена значения Config_flag по нажатию ENTER
-     /* switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
-      {
-        case 1: Config_app();//Config_1();
-          break;
-        case 2: Config_app();///Config_2();
-          break;
-        case 3: Config_app();///Config_3();
-          break;
-        case 4: Config_app();///Config_4();
-          break;
-        };*///функция редактирования конфигов-принимает номер выбранного конфига???????
+       if((Config_flag!=0)&&((_Pos==1&&_tes==3)||(_Pos==2&&_tes==2)||(_Pos==3&&_tes==4)||(_Pos==4&&_tes==6)))//выход в меню конфигов при выборе exit в папках параметров конфигов
+  { Config_flag=0;
+    _tes=1;
+    List_menu(_Menu,_Pos);
+  }
+      else if(((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_CONFIG)
+      {if(Config_flag==2){Config_flag--;Config_app(3);}
+          else{Config_flag++;Config_app(1);};
+          };
       };
-    }
  }
 
  void Arow_render()
-     {if(Config_flag)//????
+     {if(Config_flag!=0)//????
        {// if(Launch_APP!=0)return(0);//????
-        int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//номер дочерней папки
-        if(Config_flag==1)((_tes<((uint8_t)pgm_read_word(&(MStruct[g+_Pos].f_num))))?_tes++:_tes=1);//если кол-во файлов в текущей папке>_tes то..
-       myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);//блымка иконки кнопки ->
+        int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//_Menu=6; g=11
+         if(Config_flag==1)((_tes<((uint8_t)pgm_read_word(&(MStruct[g+_Pos-1].f_num))))?_tes++:_tes=1);
+       myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);
            myOLED.update();
            delay(50);
-       if(Config_flag==2)Config_app(2);else Config_app();
+            if(Config_flag==2)Config_app(2);else Config_app(0);
+       //Config_app();
        }
        else{((_Pos<((uint8_t)pgm_read_word(&(MStruct[_Menu].f_num))))?_Pos++:_Pos=1);
        if(_Menu==0)Menu();
