@@ -86,6 +86,8 @@ void List_menu(int,int);
 void Config_app();
 void destr(byte, int);
 int constr(byte);
+void wait(int);
+void scroll();
 
 void Enter_render();
 void Arow_render();
@@ -199,13 +201,50 @@ void loop()
     Enter_render();
     //Pacman();
   }
+  ////////////////// бегущая строка
+  scroll();
+  /*if(_Menu)for (int i=128; i>=-(36*6); i--)
+  {
+    if ((button1.flagClick || button2.flagClick) == true )
+        // был клик кнопки 1
+        break;
+    myOLED.print("Here could be your Advertising!!!!!!", i, 56);
+    myOLED.update();
+    wait(50);
+  };*/
 }
 // обработчик прерывания
 void  timerInterupt() {
   button1.scanState();// вызов метода ожидания стабильного состояния для кнопки1
   button2.scanState();// вызов метода ожидания стабильного состояния для кнопки2
 }
+//////////////////// аналог delay() без остановки программы
+void wait(int t)
+{unsigned long x=millis();
+ while((millis()-x)<t){if ( (button1.flagClick || button2.flagClick) == true )
+        // был клик кнопки 1
+        break;}
+}
+//////////////////////
+void scroll()
+{ volatile static int _i=128;
 
+  if(_Menu)while(_i>=-(36*6))
+  {
+    if ((button1.flagClick || button2.flagClick) == true )
+        // был клик кнопки 1
+        //_i=i;//сохраним i на котором вышли из цикла
+        break;
+       // if(i==-(36*6))_it=128;
+    myOLED.print("Here could be your Advertising!!!!!!", _i, 56);
+    myOLED.update();
+    wait(50);
+     _i--;
+     if(_i<-(36*6))_i=128;
+  }
+  else _i=128;
+  }
+//////////////////////
 void Pacman()
 { myOLED.clrScr();
   for (int pc = 0; pc < 3; pc++)
@@ -424,10 +463,10 @@ myOLED.drawRoundRect(110, 0, 127, 13);
 myOLED.print(plr(MENU_N,(g+t-1)), CENTER, 0);//Заголовок
 if(Config_flag==1)myOLED.drawRoundRect(1, 15, 89, 26);//Обрамление выделенного пункта меню                 
 if(Config_flag==2)myOLED.drawRoundRect(90, 15, 127, 26);//Обрамление редактируемого параметра конфига
-myOLED.printNumI(_Pos, 3, 57);
+/*myOLED.printNumI(_Pos, 3, 57);
 myOLED.printNumI(_tes, 20, 57);
 myOLED.printNumI(sum, 38, 57);
-myOLED.printNumI(Config_flag, 56, 57);
+myOLED.printNumI(Config_flag, 56, 57);*/
 
 
   while (i < ((s < PX) ? s : PX))
@@ -508,7 +547,19 @@ myOLED.printNumI(Config_flag, 56, 57);
       else if(((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_CONFIG)
       {if(Config_flag==2){Config_flag--;Config_app(3);}
           else{Config_flag++;Config_app(1);};
-          };
+          };//?? будет выполнятся каждый раз при нажатии ентер внутри файлов T_CONFIG?
+       //Config_app();
+      /*switch (((uint8_t)pgm_read_word(&(MStruct[x].id_dot))))
+      {
+        case 1: Config_app();//Config_1();
+          break;
+        case 2: Config_app();///Config_2();
+          break;
+        case 3: Config_app();///Config_3();
+          break;
+        case 4: Config_app();///Config_4();
+          break;
+        };//функция редактирования конфигов-принимает номер выбранного конфига???????*/
       };
  }
 
