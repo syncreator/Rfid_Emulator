@@ -6,9 +6,8 @@ int Watch(unsigned int Start_Time=0, unsigned long X_Point=0,)
   unsigned long Temp_time; //переменная для промежуточных вычислений 
     Temp_time=Start_Time+(((cur_time-X_Point)/1000/60)%1440);//текущее время в минутах
   
- 
- Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time)
- 
+ if((millis()>= X_Point)Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time);
+    else )Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time);
  
  
     if(cur_time+1000<=millis())
