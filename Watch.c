@@ -1,14 +1,14 @@
 #includ
 //Возвращает время в минутах на текущий момент вызова (диапазон 24часа)
-int Watch(unsigned int Start_Time=0, unsigned long X_Point=0,)
-{ int static s(0);
-  unsigned long static cur_time=millis();
+int Watch(unsigned int St_time=0, unsigned long X_point=0,)//St_time точка отчета времени установленная юзером в конфиге, X_point значение временни по millis() синхронизированное c моментом установки времени в конфиге:)  
+{ int static s(0);//переменная для вычисления четности момента мигания секундных точек
+  unsigned long static cur_time=millis();//флаг для определения истечения какого-то промежутка времени
   unsigned long Temp_time; //переменная для промежуточных вычислений 
-    Temp_time=Start_Time+(((cur_time-X_Point)/1000/60)%1440);//текущее время в минутах
+    //Temp_time=St_time+(((cur_time-X_Point)/1000/60)%1440);//текущее время в минутах
   
- if((millis()>= X_Point)Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time);
+ if((millis()>= X_point)Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time);
     else )Temp_time=(((millis()-X_Point)/1000/60)%1440>=1440-Start_Time)?Start_Time+((millis()-X_Point)/1000/60)%1440:(((millis()-X_Point)/1000/60)%1440)-(1440-Start_Time);
- 
+ //Temp_time=(St_time>=(X_point-millis())%1440)? St_time-(X_point-millis())%1440 : St_time+(1440-(X_point-millis())%1440);
  
     if(cur_time+1000<=millis())
     { cur_time=millis();s++;
