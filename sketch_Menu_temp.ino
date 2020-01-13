@@ -2,6 +2,7 @@
 #include <MsTimer2.h>
 #include <Button.h>
 #include <EEPROM.h>
+#include "watch.h"
 
 #include <OLED_I2C.h>
 #define LED_1_PIN    9   // светодиод подключен к выводу 9
@@ -31,6 +32,8 @@ Button button2(BUTTON_2_PIN, 1);  // создание объекта - кноп�
 OLED  myOLED(SDA, SCL, 8);
 
 extern uint8_t SmallFont[];
+extern uint8_t BigNumbers[];
+extern uint8_t MediumNumbers[];
 extern uint8_t check_14x10[];
 extern uint8_t check1_14x10[];
 extern uint8_t arrow_13x10[];
@@ -49,12 +52,17 @@ extern uint8_t pacman1[];
 extern uint8_t pacman2[];
 extern uint8_t pacman3[];
 extern uint8_t pill[];
+extern uint8_t alarm15x14[];
+extern uint8_t minialarm[];
 
 volatile int _Menu(0),_Pos(1),_tes(1),Config_flag(0);//,Launch_APP(0); //_Pos нумеруется с 1!!!
 //char ti[] = "<>"; //вспомоательный массив для добавления ковычек в заголовок
+
 uint8_t* bm;
 int pacy;
 char b[16];
+unsigned long prevTime;  // предыдущее значение времени
+//unsigned long curTime;  // текущее значение времени
 
 //массив указателей на иконки меню.
 uint8_t* const fp[]PROGMEM = {pacman32, key1, torch, menu_alarm, menu_tunemaker, menu_settings, menu_sleep, menu_exit};
@@ -88,6 +96,8 @@ void destr(byte, int);
 int constr(byte);
 void wait(int);
 void scroll();
+//unsigned int Watch(unsigned int, unsigned long);
+void Watch(/*unsigned long, unsigned int*/);
 
 void Enter_render();
 void Arow_render();
@@ -172,18 +182,22 @@ void setup()
   delay(10);
   //// EEPROM for ConfigLimits
   for(byte i=0;i<=10;i++)
-  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || constr(i)>((uint8_t)pgm_read_word(&(ConfigLim[i].c_max))))
+  if ((EEPROM[i*2]==255 && EEPROM[i*2+1]==255) || constr(i)>((uint16_t)pgm_read_word(&(ConfigLim[i].c_max))))
   destr(i,(uint8_t)pgm_read_word(&(ConfigLim[i].def)));
-  Serial.begin(9600); // инициализация послед. порта
-  /*//Отработка монитора посл. порта:
+  /*Serial.begin(9600); // инициализация послед. порта
+  //Отработка монитора посл. порта:
   for (int addr=0; addr<50; addr++) { // для всех ячеек памяти (для Arduino UNO 1024)
     byte val =EEPROM.read(addr); // считываем 1 байт по адресу ячейки
     Serial.print(addr);
     Serial.print("\t");// выводим адрес в послед. порт 
-    Serial.println(val,DEC); // выводим значение в послед. порт
+    if (addr%2){Serial.print(val,DEC);Serial.print("\t");Serial.print(EEPROM[addr-1]*255+EEPROM[addr],DEC);Serial.print("\t");Serial.println((uint16_t)pgm_read_word(&(ConfigLim[(addr-1)/2].c_max)),DEC);} // выводим значение в послед. порт
+    else Serial.println(val,DEC);
   }
   delay(6000); // задержка 1 мин
   //Конец отработки монитора посл. порта:)*/
+  //Начало отчета времени для часов
+  prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();  // предыдущее значение времени
+
 }
 
 void loop()
@@ -202,16 +216,21 @@ void loop()
     //Pacman();
   }
   ////////////////// бегущая строка
-  scroll();
-  /*if(_Menu)for (int i=128; i>=-(36*6); i--)
-  {
-    if ((button1.flagClick || button2.flagClick) == true )
-        // был клик кнопки 1
-        break;
-    myOLED.print("Here could be your Advertising!!!!!!", i, 56);
-    myOLED.update();
-    wait(50);
-  };*/
+  //scroll();
+  ///////////////// Часы
+  if(prevTime!=Time(constr(3),constr(9)*65535+constr(10))/*+1000<=millis()*/&& _Menu==0){prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();
+                             myOLED.printNumI(prevTime/60/60, 78, 57,2,'0'); //часы
+                             if((prevTime%60)%2)myOLED.print(":", 91, 57);
+                             else myOLED.print(" ", 91, 57);
+                             myOLED.printNumI((prevTime/60)%60, 96, 57,2,'0');//минуты
+                             myOLED.print(":", 109, 57);
+                             myOLED.printNumI(prevTime%60, 114, 57,2,'0');//секунды
+                             if(constr(5))myOLED.drawBitmap(69, 57, minialarm, 8, 8);
+                             else {myOLED.print(" ", 69, 57);
+                             myOLED.print(" ", 71, 57);
+                             }
+                             myOLED.update();
+  }
 }
 // обработчик прерывания
 void  timerInterupt() {
@@ -250,8 +269,8 @@ void Pacman()
   for (int pc = 0; pc < 3; pc++)
   {
     if ( button1.flagClick == true )
-      // был клик кнопки 1
-      break;
+        // был клик кнопки 1
+        break;
     pacy = random(20, 44);
     //int j=0;
     for (int i = -20,j=0; i < 132; i++,j++)
@@ -425,9 +444,54 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
   myOLED.update();
 } 
 /////////////
+void Watch(/*unsigned long Time, unsigned int alarm =0 */)//вывод часов на весь экран + будильник
+{ unsigned long t=constr(3), prevTime=Time(constr(3),constr(9)*65535+constr(10));
+ myOLED.clrScr();
+ for (int i=0; i<=10000; i++)
+  {
+    myOLED.setFont(MediumNumbers);
+    myOLED.printNumF(float(i)/3, 2, RIGHT, 0);
+    myOLED.setFont(BigNumbers);
+    myOLED.printNumI(i, RIGHT, 40);
+    myOLED.update();
+  }
+  myOLED.setFont(SmallFont);
+/* myOLED.setFont(MediumNumbers);
+  while(1)
+  {if ( button1.flagClick == true )
+        // был клик кнопки 1
+        myOLED.setFont(SmallFont);
+        break;
+    if(prevTime!=Time(constr(3),constr(9)*65535+constr(10))){prevTime=Time(constr(3),constr(9)*65535+constr(10));
+                            myOLED.clrScr();
+                            myOLED.print("Time",5, 2);
+                            myOLED.printNumI(Time(constr(3),constr(9)*65535+constr(10)), 30, 2);
+                            myOLED.print("ST_time*60", 15, 11);
+                            myOLED.printNumI(t, 5, 21);
+                            myOLED.printNumI(t*60,40,21,5);
+                            myOLED.print("X_point", 15, 32);
+                            myOLED.printNumI(constr(9)*65535+constr(10), 15, 42,10);
+                            ///////////////////////////////////////////////////////
+                             myOLED.printNumI(prevTime/60/60, 74, 57,2,'0'); //часы
+                             myOLED.print(":", 87, 57);
+                             myOLED.printNumI((prevTime/60)%60, 92, 57,2,'0');//минуты
+                             myOLED.print(":", 105, 57);
+                             myOLED.printNumI(prevTime%60, 110, 57,2,'0');//секунды
+                             myOLED.update();
+                              myOLED.clrScr();
+                              myOLED.printNumI(9/*prevTime/60/60*//*, 8, 27,2,'0'); //часы
+                            /* myOLED.print(".", 36, 27);
+                             myOLED.printNumI((prevTime/60)%60, 50, 27,2,'0');//минуты
+                             myOLED.print(".", 78, 27);
+                             myOLED.printNumI(prevTime%60,92 ,27,2,'0');//секунды
+                             myOLED.update();
+       }
+    }*/
+}
+//////////
 void destr(byte i, int x)//трансляция int x в два байтовых ЕЕПРОМА
 {//byte j=i*2;
- if(x>50879)return;//проверка на мах допустивый размер числа
+ if(x>65500)return;//проверка на мах допустивый размер числа
  EEPROM.update(i*2,x/255);
  EEPROM.update(i*2+1,x%255);
 }
@@ -451,9 +515,11 @@ int Config_app(int f=0)
            s =(uint8_t)pgm_read_word(&(MStruct[g+t-1].f_num));  //кол-во файлов в папке
  //обработка EEPROM данных
  if (f==1) _val=constr(sum+_tes-1-(_Pos-1));//сохраняем текущее значение конфига в _val
- if (f==2) {if(_val<((uint8_t)pgm_read_word(&(ConfigLim[sum+_tes-1-(_Pos-1)].c_max)))) _val++;
+ if (f==2) {if(_val<((uint16_t)pgm_read_word(&(ConfigLim[sum+_tes-1-(_Pos-1)].c_max)))) _val++;
                   else _val=0;}//прибавляем 1 к _val пока не достигнет MAX значения 
- if (f==3) destr(sum+_tes-1-(_Pos-1),_val);// сохраняем _val в EEPROM
+ if (f==3) {destr(sum+_tes-1-(_Pos-1),_val);// сохраняем _val в EEPROM
+    if (sum+_tes-1-(_Pos-1)==3){unsigned long x=millis();destr(9,(int)(x/65535));destr(10,(int)(x%65535));};//разборка millis() на 4байт EEPROM 18,19,20,21
+ }// сборка в unsigned long  constr(9)*65535+constr(10)
  /// прорисовка графики
  myOLED.clrScr();
 myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
@@ -463,8 +529,8 @@ myOLED.drawRoundRect(110, 0, 127, 13);
 myOLED.print(plr(MENU_N,(g+t-1)), CENTER, 0);//Заголовок
 if(Config_flag==1)myOLED.drawRoundRect(1, 15, 89, 26);//Обрамление выделенного пункта меню                 
 if(Config_flag==2)myOLED.drawRoundRect(90, 15, 127, 26);//Обрамление редактируемого параметра конфига
-/*myOLED.printNumI(_Pos, 3, 57);
-myOLED.printNumI(_tes, 20, 57);
+/*myOLED.printNumI(_val, 3, 57);
+myOLED.printNumI((uint16_t)pgm_read_word(&(ConfigLim[sum+_tes-1-(_Pos-1)].c_max)), 20, 57);
 myOLED.printNumI(sum, 38, 57);
 myOLED.printNumI(Config_flag, 56, 57);*/
 
@@ -523,7 +589,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           break;
         case 2: Pacman();//Torch();
           break;
-        case 3: Pacman();//Watch();
+        case 3: Watch(/*Time(constr(3),constr(9)*65535+constr(10))*/);
           break;
         case 4: Pacman();//Sleep();
           break;
