@@ -58,18 +58,23 @@ void Watch(unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_
                             myOLED.print("X_point", 15, 32);
                             myOLED.printNumI(constr(9)*65535+constr(10), 15, 42,10);*/
                             ///////////////////////////////////////////////////////
-                             myOLED.printNumI(prevTime/60/60, 74, 57,2,'0'); //часы
+                             /*myOLED.printNumI(prevTime/60/60, 74, 57,2,'0'); //часы
                              myOLED.print(":", 87, 57);
                              myOLED.printNumI((prevTime/60)%60, 92, 57,2,'0');//минуты
                              myOLED.print(":", 105, 57);
                              myOLED.printNumI(prevTime%60, 110, 57,2,'0');//секунды
-                             myOLED.update();
-                              myOLED.clrScr();
-                              myOLED.printNumI(9/*prevTime/60/60*//*, 8, 27,2,'0'); //часы
-                            /* myOLED.print(".", 36, 27);
-                             myOLED.printNumI((prevTime/60)%60, 50, 27,2,'0');//минуты
-                             myOLED.print(".", 78, 27);
-                             myOLED.printNumI(prevTime%60,92 ,27,2,'0');//секунды
+                             myOLED.update();*/
+                             myOLED.clrScr();
+                             myOLED.setFont(BigNumbers);
+                             myOLED.printNumI(prevTime/60/60, 8, 37,2,'0'); //часы
+                             myOLED.drawRoundRect(36, 40, 38, 46);
+                             myOLED.drawRoundRect(36, 50, 38, 56);
+                             //myOLED.print(".", 36, 27);
+                             myOLED.printNumI((prevTime/60)%60, 50, 37,2,'0');//минуты
+                             myOLED.drawRoundRect(78, 40, 80, 46);
+                             myOLED.drawRoundRect(78, 50, 80, 56);
+                             //myOLED.print(".", 78, 27);
+                             myOLED.printNumI(prevTime%60,92 ,37,2,'0');//секунды
                              myOLED.update();
        }
     }*/
