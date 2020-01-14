@@ -13,7 +13,7 @@ unsigned long Time(unsigned long St_time=0, unsigned long X_point=0/*,unsigned l
 }
 ///////////////////////////////////////////
 
-void Watch(unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0)//вывод часов на весь экран + будильник
+void Watch(unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0, uint8_t* bm)//вывод часов на весь экран + будильник
 {unsigned long  prevTime=Time(St_time,X_point);
  //Заголовок + инфа по будильнику и обрамление
  myOLED.clrScr();
@@ -23,11 +23,12 @@ void Watch(unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_
  //myOLED.drawRoundRect(110, 0, 127, 13);
   myOLED.print("<Watch_app>", CENTER, 0);
  myOLED.print("ALARM",3, 14);
+  myOLED.drawBitmap(55,14 pacy, bm, 15, 14);
  if(alarm_flag) myOLED.print("on", 35, 14);//BOOL on/off
                     else myOLED.print("off", 35, 14);
- myOLED.printNumI(alarm_time/60, 65, 14, 2,'0');//Т_2
-                    myOLED.print(":", 75,  14, 2,'0');
-                    myOLED.printNumI(alarm_time%60, 82, 14, 2,'0');
+ myOLED.printNumI(alarm_time/60, 92, 14, 2,'0');//Т_2
+                    myOLED.print(":", 105,  14, 2,'0');
+                    myOLED.printNumI(alarm_time%60, 110, 14, 2,'0');
   myOLED.drawRoundRect(1, 6, 127, 16);
   myOLED.drawRoundRect(1, 18, 127, 63);
  //
@@ -46,6 +47,7 @@ void Watch(unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_
   while(1)
   {if ( button1.flagClick == true )
         // был клик кнопки 1
+    button1.flagClick = false;        // сброс признака
         myOLED.setFont(SmallFont);
         break;
     if(prevTime!=Time(St_time,X_point){prevTime=Time(St_time,X_point);
