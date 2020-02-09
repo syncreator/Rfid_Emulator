@@ -4,6 +4,7 @@
 #include <EEPROM.h>
 #include <OLED_I2C.h>
 #include "watch.h"
+#include "pitches.h"
 
 #define LED_1_PIN    9   // светодиод подключен к выводу 9
 #define BUTTON_1_PIN 0  // кнопка подключена к выводу 0
@@ -57,7 +58,6 @@ extern uint8_t pacman1[];
 extern uint8_t pacman2[];
 extern uint8_t pacman3[];
 extern uint8_t pill[];
-extern uint8_t alarm15x14[];
 extern uint8_t minialarm[];
 
 volatile int _Menu(0),_Pos(1),_tes(1),Config_flag(0);//,Launch_APP(0); //_Pos нумеруется с 1!!!
@@ -68,6 +68,8 @@ int pacy;
 char b[16];
 unsigned long prevTime;  // предыдущее значение времени
 //unsigned long curTime;  // текущее значение времени
+const int Pin_tone = 2; // номер порта зуммера
+const byte COUNT_NOTES = 39; // Колличество нот
 
 //массив указателей на иконки меню.
 uint8_t* const fp[]PROGMEM = {pacman32, key1, torch, menu_alarm, menu_tunemaker, menu_settings, menu_sleep, menu_exit};
@@ -101,6 +103,7 @@ void destr(byte, int);
 int constr(byte);
 void wait(int);
 void scroll();
+void music();
 void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0);
 
 void Enter_render();
@@ -144,9 +147,30 @@ static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
   INT, 3, 1,    //10 Volume
 };
 
+int frequences[COUNT_NOTES] = {
+  392, 392, 392, 311, 466, 392, 311, 466, 392,
+  587, 587, 587, 622, 466, 369, 311, 466, 392,
+  784, 392, 392, 784, 739, 698, 659, 622, 659,
+  415, 554, 523, 493, 466, 440, 466,
+  311, 369, 311, 466, 392
+};
+//длительность нот
+int durations[COUNT_NOTES] = {
+  350, 350, 350, 250, 100, 350, 250, 100, 700,
+  350, 350, 350, 250, 100, 350, 250, 100, 700,
+  350, 250, 100, 350, 250, 100, 100, 100, 450,
+  150, 350, 250, 100, 100, 100, 450,
+  150, 350, 250, 100, 750
+};
+
+int melody[] = { NOTE_E5, NOTE_D5, NOTE_F4, NOTE_G4, NOTE_C5, NOTE_B4, NOTE_D4, NOTE_E4, NOTE_B4, NOTE_A4, NOTE_C4, NOTE_E4, NOTE_A4 };
+int noteDurations[] = { 8, 8, 4, 4, 8, 8, 4, 4, 8, 8, 4, 4, 1 };
+int amountNotes = 13;
+
 void setup()
 {
   pinMode(LED_1_PIN, OUTPUT);// определяем вывод светодиода как выход
+  pinMode(Pin_tone, OUTPUT);  // Настраиваем контакт на выход
   // pinMode(BUTTON_1_PIN, INPUT_PULLUP);// определяем вывод кнопки 1 как вход
   // pinMode(BUTTON_2_PIN, INPUT_PULLUP); определяем вывод кнопки 2 как вход
   MsTimer2::set(2, timerInterupt); // задаем период прерывания по таймеру 2 мс
@@ -164,7 +188,7 @@ void setup()
   myOLED.print("Yuriy Savichev", CENTER, 57);
   myOLED.update();
 
-  delay(6000);
+  delay(6000);//????
 
   myOLED.clrScr();
 
@@ -201,6 +225,16 @@ void setup()
   //Конец отработки монитора посл. порта:)*/
   //Начало отчета времени для часов
   prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();  // предыдущее значение времени
+  ///Мелодия загрузки-Nokia_tune
+  for (int thisNote = 0; thisNote < amountNotes; thisNote++) {
+    int noteDuration = 1000/noteDurations[thisNote];
+    tone(Pin_tone, melody[thisNote], noteDuration);
+    //digitalWrite(13, HIGH);
+    delay(noteDuration);
+    //digitalWrite(13, LOW);
+    //delay(pauseBetweenNotes/2);
+  }
+  noTone(Pin_tone);
 
 }
 
@@ -220,21 +254,25 @@ void loop()
     //Pacman();
   }
   ////////////////// бегущая строка
-  //scroll();
+  scroll();
   ///////////////// Часы
-  if(prevTime!=Time(constr(3),constr(9)*65535+constr(10))/*+1000<=millis()*/&& _Menu==0){prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();
-                             myOLED.printNumI(prevTime/60/60, 78, 57,2,'0'); //часы
-                             if((prevTime%60)%2)myOLED.print(":", 91, 57);
-                             else myOLED.print(" ", 91, 57);
-                             myOLED.printNumI((prevTime/60)%60, 96, 57,2,'0');//минуты
-                             myOLED.print(":", 109, 57);
-                             myOLED.printNumI(prevTime%60, 114, 57,2,'0');//секунды
-                             if(constr(5))myOLED.drawBitmap(69, 57, minialarm, 8, 8);
-                             else {myOLED.print(" ", 69, 57);
-                             myOLED.print(" ", 71, 57);
+  if(!((prevTime*1000-millis())%1000%50)&&_Menu==0)
+  { if(prevTime!=Time(constr(3),constr(9)*65535+constr(10))/*&& _Menu==0*/)
+     prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();
+                             myOLED.printNumI(prevTime/60/60, 96, 57,2,'0'); //часы
+                             if((prevTime%60)%2)myOLED.print(":", 109, 57);
+                             else myOLED.print(" ", 109, 57);
+                             myOLED.printNumI((prevTime/60)%60, 114, 57,2,'0');//минуты
+                             //myOLED.print(":", 109, 57);
+                             //myOLED.printNumI(prevTime%60, 114, 57,2,'0');//секунды
+                             if(constr(5))myOLED.drawBitmap(87, 57, minialarm, 8, 8);
+                             else {myOLED.print(" ", 87, 57);
+                             myOLED.print(" ", 89, 57);
                              }
                              myOLED.update();
   }
+  ////////
+  
 }
 // обработчик прерывания
 void  timerInterupt() {
@@ -268,6 +306,345 @@ void scroll()
   else _i=128;
   }
 //////////////////////
+void music()
+{
+ /* for (int i = 0; i <= COUNT_NOTES; i++  ) { // Цикл от 0 до количества нот
+    tone(Pin_tone, frequences[i], durations[i] * 2); // Включаем звук, определенной частоты
+    delay(durations[i] * 2);  // Дауза для заданой ноты
+    //noTone(Pin_tone); // Останавливаем звук
+    }
+    noTone(Pin_tone); 
+    delay(2000);*/
+    //STAR WARS
+    tone(Pin_tone, 392, 350);
+delay(350);
+tone(Pin_tone, 392, 350);
+delay(350);
+tone(Pin_tone, 392, 350);
+delay(350);
+tone(Pin_tone, 311, 250);
+delay(250);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 392, 350);
+delay(350);
+tone(Pin_tone, 311, 250);
+delay(250);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 392, 700);
+delay(700);
+
+tone(Pin_tone, 587, 350);
+delay(350);
+tone(Pin_tone, 587, 350);
+delay(350);
+tone(Pin_tone, 587, 350);
+delay(350);
+tone(Pin_tone, 622, 250);
+delay(250);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 369, 350);
+delay(350);
+tone(Pin_tone, 311, 250);
+delay(250);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 392, 700);
+delay(700);
+
+tone(Pin_tone, 784, 350);
+delay(350);
+tone(Pin_tone, 392, 250);
+delay(250);
+tone(Pin_tone, 392, 100);
+delay(100);
+tone(Pin_tone, 784, 350);
+delay(350);
+tone(Pin_tone, 739, 250);
+delay(250);
+tone(Pin_tone, 698, 100);
+delay(100);
+tone(Pin_tone, 659, 100);
+delay(100);
+tone(Pin_tone, 622, 100);
+delay(100);
+tone(Pin_tone, 659, 450);
+delay(450);
+
+tone(Pin_tone, 415, 150);
+delay(150);
+tone(Pin_tone, 554, 350);
+delay(350);
+tone(Pin_tone, 523, 250);
+delay(250);
+tone(Pin_tone, 493, 100);
+delay(100);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 440, 100);
+delay(100);
+tone(Pin_tone, 466, 450);
+delay(450);
+
+tone(Pin_tone, 311, 150);
+delay(150);
+tone(Pin_tone, 369, 350);
+delay(350);
+tone(Pin_tone, 311, 250);
+delay(250);
+tone(Pin_tone, 466, 100);
+delay(100);
+tone(Pin_tone, 392, 750);
+delay(750);
+noTone(Pin_tone); 
+    delay(2000);
+    //
+    // звук "Успешное включение"
+    tone(Pin_tone, NOTE_A7); delay(100);
+    tone(Pin_tone, NOTE_G7); delay(100);
+    tone(Pin_tone, NOTE_E7); delay(100); 
+    tone(Pin_tone, NOTE_C7); delay(100);  
+    tone(Pin_tone, NOTE_D7); delay(100); 
+    tone(Pin_tone, NOTE_B7); delay(100); 
+    tone(Pin_tone, NOTE_F7); delay(100); 
+    tone(Pin_tone, NOTE_C7); delay(100);
+    noTone(Pin_tone); 
+    delay(2000);
+    
+// звук ОК
+    for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
+    noTone(Pin_tone);
+    delay(2000);
+  
+// звук "очередной шаг"
+    for (int i=2500; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(10); }
+    noTone(Pin_tone);
+    delay(2000);
+  
+// звук "ERROR"
+    for (int j=0; j <3; j++){
+    for (int i=1000; i<2000; i=i*1.1) { tone(Pin_tone, i); delay(10); }
+    delay(50);
+    for (int i=1000; i>500; i=i*1.9) { tone(Pin_tone, i); delay(10); }
+    delay(50);
+    }
+    noTone(Pin_tone);
+    delay(2000);
+//Pacman#1
+tone(Pin_tone, NOTE_B5); delay(1000/6);
+    tone(Pin_tone, NOTE_B6); delay(1000/6);
+    tone(Pin_tone, NOTE_FS6); delay(1000/6); 
+    tone(Pin_tone, NOTE_DS6); delay(1000/6);  
+    tone(Pin_tone, NOTE_B6); delay(1000/6); 
+    tone(Pin_tone, NOTE_F6); delay(1000/6); 
+    tone(Pin_tone, NOTE_E6); delay(1000/6); 
+    tone(Pin_tone, NOTE_C5); delay(1000/6);
+
+    tone(Pin_tone, NOTE_C6); delay(1000/6);
+    tone(Pin_tone, NOTE_G6); delay(1000/6); 
+    tone(Pin_tone, NOTE_F5); delay(1000/6);  
+    tone(Pin_tone, NOTE_C6); delay(1000/6); 
+    tone(Pin_tone, NOTE_G6); delay(1000/6); 
+    tone(Pin_tone, NOTE_E6); delay(1000/6); 
+    
+    noTone(Pin_tone); 
+    delay(2000);
+
+    //Pacman#2
+tone(Pin_tone, NOTE_B4); delay(1000/16);
+    tone(Pin_tone, NOTE_B5); delay(1000/16);
+    tone(Pin_tone, NOTE_FS5); delay(1000/16); 
+    tone(Pin_tone, NOTE_DS5); delay(1000/16);  
+    tone(Pin_tone, NOTE_B5); delay(1000/32); 
+    tone(Pin_tone, NOTE_FS5); delay(1000/16); 
+    tone(Pin_tone, NOTE_DS5); delay(1000/8); 
+    tone(Pin_tone, NOTE_C5); delay(1000/16);
+
+    tone(Pin_tone, NOTE_C6); delay(1000/16);
+    tone(Pin_tone, NOTE_G6); delay(1000/16); 
+    tone(Pin_tone, NOTE_E6); delay(1000/16);  
+    tone(Pin_tone, NOTE_C6); delay(1000/32); 
+    tone(Pin_tone, NOTE_G6); delay(1000/16); 
+    tone(Pin_tone, NOTE_E6); delay(1000/8);
+
+tone(Pin_tone, NOTE_B4); delay(1000/16);
+    tone(Pin_tone, NOTE_B5); delay(1000/16);
+    tone(Pin_tone, NOTE_FS5); delay(1000/16); 
+    tone(Pin_tone, NOTE_DS5); delay(1000/16);  
+    tone(Pin_tone, NOTE_B5); delay(1000/32); 
+    tone(Pin_tone, NOTE_FS5); delay(1000/16); 
+    tone(Pin_tone, NOTE_DS5); delay(1000/8);
+
+    tone(Pin_tone, NOTE_DS5); delay(1000/32);
+    tone(Pin_tone, NOTE_E5); delay(1000/32);
+    tone(Pin_tone, NOTE_F5); delay(1000/32); 
+    tone(Pin_tone, NOTE_F5); delay(1000/32);
+    tone(Pin_tone, NOTE_FS5); delay(1000/32);
+    tone(Pin_tone, NOTE_G5); delay(1000/32);
+    tone(Pin_tone, NOTE_G5); delay(1000/32);
+    tone(Pin_tone, NOTE_GS5); delay(1000/32);
+    tone(Pin_tone, NOTE_A5); delay(1000/16);
+    tone(Pin_tone, NOTE_B5); delay(1000/8);
+noTone(Pin_tone); 
+    delay(2000);
+//Spermario
+tone(11,660,100);
+delay(150);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,510,100);
+delay(100);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,770,100);
+delay(550);tone(Pin_tone,380,100);
+delay(574);tone(Pin_tone,510,100);
+delay(450);tone(Pin_tone,380,100);
+delay(400);tone(Pin_tone,320,100);
+delay(500);tone(Pin_tone,440,100);
+delay(300);tone(Pin_tone,480,80);
+delay(330);tone(Pin_tone,450,100);
+delay(150);tone(Pin_tone,430,100);
+delay(300);tone(Pin_tone,380,100);
+delay(200);tone(Pin_tone,660,80);
+delay(200);tone(Pin_tone,760,50);
+delay(150);tone(Pin_tone,860,100);
+delay(300);tone(Pin_tone,700,80);
+delay(150);tone(Pin_tone,760,50);
+delay(350);tone(Pin_tone,660,80);
+delay(300);tone(Pin_tone,520,80);
+delay(150);tone(Pin_tone,580,80);
+delay(150);tone(Pin_tone,480,80);
+delay(350);tone(Pin_tone,510,100);
+delay(550);tone(Pin_tone,380,100);
+delay(400);tone(Pin_tone,320,100);
+delay(500);tone(Pin_tone,440,100);
+delay(300);tone(Pin_tone,480,80);
+delay(330);tone(Pin_tone,450,100);
+delay(150);tone(Pin_tone,430,100);
+delay(300);tone(Pin_tone,380,100);
+delay(200);tone(Pin_tone,660,80);
+delay(200);tone(Pin_tone,760,50);
+delay(150);tone(Pin_tone,860,100);
+delay(300);tone(Pin_tone,700,80);
+delay(150);tone(Pin_tone,760,50);
+delay(350);tone(Pin_tone,660,80);
+delay(300);tone(Pin_tone,520,80);
+delay(150);tone(Pin_tone,580,80);
+delay(150);tone(Pin_tone,480,80);
+delay(500);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,760,100);
+delay(100);tone(Pin_tone,720,100);
+delay(150);tone(Pin_tone,680,100);
+delay(150);tone(Pin_tone,620,150);
+delay(300);tone(Pin_tone,650,150);
+delay(300);tone(Pin_tone,380,100);
+delay(150);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(100);tone(Pin_tone,570,100);
+delay(220);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,760,100);
+delay(100);tone(Pin_tone,720,100);
+delay(150);tone(Pin_tone,680,100);
+delay(150);tone(Pin_tone,620,150);
+delay(300);tone(Pin_tone,650,200);
+delay(300);tone(Pin_tone,1020,80);
+delay(300);tone(Pin_tone,1020,80);
+delay(150);tone(Pin_tone,1020,80);
+delay(300);tone(Pin_tone,380,100);
+delay(300);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,760,100);
+delay(100);tone(Pin_tone,720,100);
+delay(150);tone(Pin_tone,680,100);
+delay(150);tone(Pin_tone,620,150);
+delay(300);tone(Pin_tone,650,150);
+delay(300);tone(Pin_tone,380,100);
+delay(150);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(100);tone(Pin_tone,570,100);
+delay(220);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,760,100);
+delay(100);tone(Pin_tone,720,100);
+delay(150);tone(Pin_tone,680,100);
+delay(150);tone(Pin_tone,620,150);
+delay(300);tone(Pin_tone,650,200);
+delay(300);tone(Pin_tone,1020,80);
+delay(300);tone(Pin_tone,1020,80);
+delay(150);tone(Pin_tone,1020,80);
+delay(300);tone(Pin_tone,380,100);
+delay(300);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,760,100);
+delay(100);tone(Pin_tone,720,100);
+delay(150);tone(Pin_tone,680,100);
+delay(150);tone(Pin_tone,620,150);
+delay(300);tone(Pin_tone,650,150);
+delay(300);tone(Pin_tone,380,100);
+delay(150);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,430,100);
+delay(150);tone(Pin_tone,500,100);
+delay(100);tone(Pin_tone,570,100);
+delay(420);tone(Pin_tone,585,100);
+delay(550);tone(Pin_tone,550,100);
+delay(420);tone(Pin_tone,500,100);
+delay(360);tone(Pin_tone,380,100);
+delay(300);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,500,100);
+delay(150);tone(Pin_tone,500,100);
+delay(300);tone(Pin_tone,500,60);
+delay(150);tone(Pin_tone,500,80);
+delay(300);tone(Pin_tone,500,60);
+delay(350);tone(Pin_tone,500,80);
+delay(150);tone(Pin_tone,580,80);
+delay(350);tone(Pin_tone,660,80);
+delay(150);tone(Pin_tone,500,80);
+delay(300);tone(Pin_tone,430,80);
+delay(150);tone(Pin_tone,380,80);
+delay(600);tone(Pin_tone,500,60);
+delay(150);tone(Pin_tone,500,80);
+delay(300);tone(Pin_tone,500,60);
+delay(350);tone(Pin_tone,500,80);
+delay(150);tone(Pin_tone,580,80);
+delay(150);tone(Pin_tone,660,80);
+delay(450);tone(Pin_tone,870,80);
+delay(336);tone(Pin_tone,760,80);
+delay(600);tone(Pin_tone,500,60);
+delay(150);tone(Pin_tone,500,80);
+delay(300);tone(Pin_tone,500,60);
+delay(350);tone(Pin_tone,500,80);
+delay(150);tone(Pin_tone,580,80);
+delay(350);tone(Pin_tone,660,80);
+delay(150);tone(Pin_tone,500,80);
+delay(300);tone(Pin_tone,430,80);
+delay(150);tone(Pin_tone,380,80);
+delay(600);tone(Pin_tone,660,100);
+delay(150);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,510,100);
+delay(100);tone(Pin_tone,660,100);
+delay(300);tone(Pin_tone,770,100);
+delay(450);tone(Pin_tone,380,100);
+noTone(Pin_tone); 
+    delay(2000);
+    
+    //Сирена?
+    tone(Pin_tone, 700); // издаём звук на частоте 700 Гц
+    delay(200);
+    tone(Pin_tone, 500); // на частоте 500 Гц
+    delay(200);
+    tone(Pin_tone, 300); // на частоте 300 Гц
+    delay(200);
+    tone(Pin_tone, 200); // на частоте 200 Гц
+    delay(200);
+    noTone(Pin_tone); 
+    delay(2000);
+
+}
+
+//////
 void Pacman()
 { myOLED.clrScr();
   for (int pc = 0; pc < 3; pc++)
@@ -449,85 +826,7 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
 } 
 /////////////
 
-/*void Watch(uint8_t* bm, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0)//вывод часов на весь экран + будильник
-{unsigned long  prevTime=Time(St_time,X_point);
- //Заголовок + инфа по будильнику и обрамление
- myOLED.clrScr();
- myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
- myOLED.drawBitmap(112, 0, bm, 15, 14);
-  myOLED.drawRoundRect(1, 0, 17, 13);
- //myOLED.drawRoundRect(110, 0, 127, 13);
-  myOLED.print("<Watch_app>", CENTER, 2);
- myOLED.print("ALARM",5,19 );
-  //myOLED.drawBitmap(62,18, bm, 15, 14);
- if(alarm_flag) myOLED.print("_ON", 58, 19);//BOOL on/off
-                    else myOLED.print("_OFF", 58, 19);
- myOLED.printNumI(alarm_time/60, 92, 19, 2,'0');//Т_2
-                    myOLED.print(":",105,19);
-                    myOLED.printNumI(alarm_time%60, 110, 19, 2,'0');
-  myOLED.drawRoundRect(1, 14, 127, 29);
-  myOLED.drawRoundRect(1, 31, 127, 63);
-  myOLED.drawRoundRect(1, 31, 42, 63);
-  myOLED.drawRoundRect(44, 31, 79, 63);
-  myOLED.drawRoundRect(82, 31, 127, 63);
-  
- //
-/* for (int i=0; i<=50; i++)
-  {
-   // myOLED.setFont(MediumNumbers);
-    //myOLED.printNumF(float(i)/3, 2, RIGHT, 0);
-    //myOLED.setFont(BigNumbers);
-    //myOLED.printNumI(i,64,35,4,'0');
-    myOLED.drawRoundRect(36-i, 40-i, 38+i, 46+i);
-    myOLED.update();
-    delay(100);
-  }
-  //myOLED.setFont(SmallFont);
-  myOLED.drawRoundRect(36, 40, 38, 46);
-  myOLED.drawRoundRect(36, 50, 38, 56);
-  myOLED.drawRoundRect(78, 40, 80, 46);
-  myOLED.drawRoundRect(78, 50, 80, 56);
-  myOLED.update();*/
-  
-  //////////////////////////////////
 
-  /*while(1)
-  {if ( button1.flagClick == true )
-        {// был клик кнопки 1
-    button1.flagClick = false;        // сброс признака
-        myOLED.setFont(SmallFont);
-        break;}
-    if(prevTime!=Time(St_time,X_point)){prevTime=Time(St_time,X_point);
-                           /* myOLED.clrScr();
-                            myOLED.print("Time",5, 2);
-                            myOLED.printNumI(Time(constr(3),constr(9)*65535+constr(10)), 30, 2);
-                            myOLED.print("ST_time*60", 15, 11);
-                            myOLED.printNumI(t, 5, 21);
-                            myOLED.printNumI(t*60,40,21,5);
-                            myOLED.print("X_point", 15, 32);
-                            myOLED.printNumI(constr(9)*65535+constr(10), 15, 42,10);*/
-                            ///////////////////////////////////////////////////////
-                             /*myOLED.printNumI(prevTime/60/60, 74, 57,2,'0'); //часы
-                             myOLED.print(":", 87, 57);
-                             myOLED.printNumI((prevTime/60)%60, 92, 57,2,'0');//минуты
-                             myOLED.print(":", 105, 57);
-                             myOLED.printNumI(prevTime%60, 110, 57,2,'0');//секунды
-                             myOLED.update();*/
-                             //myOLED.clrScr();
-                            // myOLED.setFont(/*SmallFont*/BigNumbers);
-                            /* myOLED.printNumI(prevTime/60/60, 8, 37,2,'0'); //часы
-                             //myOLED.drawRoundRect(41, 40, 44, 46);
-                             //myOLED.drawRoundRect(41, 50, 44, 56);
-                             //myOLED.print(".", 36, 56);
-                             myOLED.printNumI((prevTime/60)%60, 50, 37,2,'0');//минуты
-                             //myOLED.drawRoundRect(78, 40, 80, 46);
-                             //myOLED.drawRoundRect(78, 50, 80, 56);
-                             //myOLED.print(".", 78, 56);
-                             myOLED.printNumI(prevTime%60,92 ,37,2,'0');//секунды
-                             myOLED.update();
-    }
-  }
-}*/
 //////////
 void destr(byte i, int x)//трансляция int x в два байтовых ЕЕПРОМА
 {//byte j=i*2;
@@ -629,7 +928,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           break;
         case 2: Pacman();//Torch();
           break;
-        case 3: Watch(myOLED, button1, button2, minialarm, constr(3),constr(9)*65535+constr(10),constr(4),constr(5));
+        case 3: Watch(myOLED, button1, button2, check_14x10, constr(3),constr(9)*65535+constr(10),constr(4),constr(5));
           break;
         case 4: Pacman();//Sleep();
           break;
@@ -637,7 +936,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           break;
         case 6: Pacman();//Key_emulate();
           break;
-        case 7: Pacman();//Music();
+        case 7: music();//Music();
           break;
       };
       if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_DFOLDER || ((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_FOLDER)// может написать.. ==(T_DFOLDER || T_FOLDER)
