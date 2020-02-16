@@ -3,9 +3,11 @@
 
 //Структура мелодии
 struct MUSIC{
-  int note
+  int note;
   uint8_t dur;
 };
+//Мелодии:
+static const MUSIC ST_WARS[]PROGMEM = {
 
 void Music(byte n, byte Pin_tone))//номер мелодии или указатель на мелодию?
 {/// звуки для оформления
