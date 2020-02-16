@@ -48,6 +48,22 @@ static const MUSIC ST_WARS[]PROGMEM = {
    466, 100, //37
    392, 750, //38
 };
+//Nokia_tune
+static const MUSIC NOK_TUNE[]PROGMEM = {
+  NOTE_E5, 8, //0
+  NOTE_D5, 8, //1
+  NOTE_F4, 4, //2
+  NOTE_G4, 4, //3
+  NOTE_C5, 8, //4
+  NOTE_B4, 8, //5
+  NOTE_D4, 4, //6
+  NOTE_E4, 4, //7
+  NOTE_B4, 8, //8
+  NOTE_A4, 8, //9
+  NOTE_C4, 4, //10
+  NOTE_E4, 4, //11
+  NOTE_A4, 1, //12
+}
 
 void Music(byte n, byte Pin_tone))//номер мелодии или указатель на мелодию?
 {/// звуки для оформления
