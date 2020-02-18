@@ -163,9 +163,9 @@ static const MUSIC C_GENA[]PROGMEM = {
   32767, 600, //43
 };
 
-void Music(byte n, byte Pin_tone))//номер мелодии или указатель на мелодию?
+void Music(byte m, byte Pin_tone))//номер мелодии или указатель на мелодию?
 { MUSIC *bm ;
-  switch (n)
+  switch (m)
       {
         case 0: bm = ST_WARS;
           break;
@@ -180,7 +180,60 @@ void Music(byte n, byte Pin_tone))//номер мелодии или указа�
         case 5: bm = C_GENA;
           break;
       }
-  /// звуки для оформления
+ 
+ ///Отрисовка графики плеера
+  myOLED.clrScr();
+ myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
+ //myOLED.drawBitmap(112, 2, bm, 14, 10);///
+  myOLED.drawRoundRect(1, 0, 17, 13);
+  myOLED.drawRoundRect(110, 0, 127, 13);///
+ //myOLED.drawRoundRect(110, 0, 127, 13);
+  myOLED.print("<PLAYER_app>", CENTER, 2);
+ myOLED.print("ALARM ->",5,19 );
+  //myOLED.drawBitmap(62,18, bm, 15, 14);
+ if(alarm_flag){ myOLED.print("_ON", 62, 19);//BOOL on/off
+                       myOLED.drawBitmap(112, 2, bm, 14, 10);
+                     }
+                    else {myOLED.print("_OFF", 62, 19);
+                    }
+ myOLED.printNumI(alarm_time/60, 92, 19, 2,'0');//Т_2
+                    myOLED.print(":",105,19);
+                    myOLED.printNumI(alarm_time%60, 110, 19, 2,'0');
+  myOLED.drawRoundRect(1, 15, 127, 29);
+  myOLED.drawRoundRect(1, 31, 127, 63);
+ //
+ myOLED.drawRoundRect(40, 40, 45, 46);//точки между часами/минутами
+ myOLED.drawRoundRect(40, 50, 45, 56);
+ /*myOLED.drawCircle(42,43,3);
+ myOLED.drawCircle(42,53,3);*/
+ ///////
+ myOLED.drawRoundRect(82, 40, 87, 46);//точки между минутами/секундами
+ myOLED.drawRoundRect(82, 50, 87, 56);
+ /*myOLED.drawCircle(82,43,3);
+ myOLED.drawCircle(82,53,3);*/
+ //////////////////////////////////
+
+  while(1)
+  {if ( button2.flagClick == true ){button2.flagClick = false;
+         destr(5,!constr(5));myOLED.setFont(SmallFont);
+         if(constr(5)){ myOLED.print("_ON ", 58, 19);//BOOL on/off
+                       myOLED.drawBitmap(112, 2, bm, 14, 10);
+                     }
+                    else {myOLED.print("_OFF", 58, 19);
+                    myOLED.print("  ", 112, 3);
+                    myOLED.print("  ", 113, 1);
+                    }
+       }
+    if ( button1.flagClick == true ){// был клик кнопки 1
+    //button1.flagClick = false;  // сброс признака
+        myOLED.setFont(SmallFont);
+        break;}
+   myOLED.update();
+ 
+///////////////////////////////////////// 
+ 
+ if(m==5)
+ {/// звуки для оформления
     // звук "Успешное включение"
     tone(Pin_tone, NOTE_A7); delay(100);
     tone(Pin_tone, NOTE_G7); delay(100);
@@ -221,7 +274,9 @@ void Music(byte n, byte Pin_tone))//номер мелодии или указа�
       }
       tone(Pin_tone, round((i)*(100/4)), 50);
     }
-    
+   noTone(Pin_tone);
+}//if end
+    else{
     //Основной цикл воспроизведения
      //for (int thisNote = 0; thisNote < sizeof(Array)/sizeof(Array[0]); thisNote++)
  int n(0); 
@@ -235,6 +290,6 @@ void Music(byte n, byte Pin_tone))//номер мелодии или указа�
     //delay(pauseBetweenNotes/2);
   }
   noTone(Pin_tone);
-
+    }//else end
 
 }
