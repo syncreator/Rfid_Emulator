@@ -222,13 +222,15 @@ void Music(byte n, byte Pin_tone))//номер мелодии или указа�
       tone(Pin_tone, round((i)*(100/4)), 50);
     }
     
-  
     //Основной цикл воспроизведения
-     for (int thisNote = 0; thisNote < sizeof(Array)/sizeof(Array[0]); thisNote++) {
-    int noteDuration = 1000/noteDurations[thisNote];
-    tone(Pin_tone, melody[thisNote], noteDuration);
+     //for (int thisNote = 0; thisNote < sizeof(Array)/sizeof(Array[0]); thisNote++)
+ int n(0); 
+ while(bm->note)n++;//вычисляем количество нот в мелодии
+ while(bm->note)
+     {
+    tone(Pin_tone, bx->note, bm->dur);
     //digitalWrite(13, HIGH);
-    delay(noteDuration);
+    delay(bm->dur);
     //digitalWrite(13, LOW);
     //delay(pauseBetweenNotes/2);
   }
