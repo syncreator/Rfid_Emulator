@@ -170,6 +170,7 @@ static const MUSIC C_GENA[]PROGMEM = {
 
 void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии или указатель на мелодию?
 { MUSIC *bm ;
+   bool ts(0);
   if(m==5)
  {/// звуки для оформления
     // звук "Успешное включение"
@@ -231,9 +232,13 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
  ///Отрисовка графики плеера
  myOLED.clrScr();
  myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);//кнопка стрелка
- //myOLED.drawBitmap(112, 2, bm, 14, 10);///
-  myOLED.drawRoundRect(1, 0, 17, 13);
-  myOLED.drawRoundRect(110, 0, 127, 13);///
+ //myOLED.drawBitmap(112, 2, check_14x10, 14, 10);///
+ //myOLED.print("  ", 112, 3);// стирачка для галочки:)
+ //myOLED.print("  ", 113, 1); // стирачка для галочки:)
+  myOLED.drawRect(3, 115, 11, 118);//вертикальные полоски для кнопки пауза
+  myOLED.drawRect(3, 120, 11, 123);//вертикальные полоски для кнопки пауза
+  myOLED.drawRoundRect(1, 0, 17, 13);// квадраты отрисовки кнопок
+  myOLED.drawRoundRect(110, 0, 127, 13);///-//-
  //myOLED.drawRoundRect(110, 0, 127, 13);
   myOLED.print("<PLAYER_app>", CENTER, 2);
  myOLED.print(melody_name,5,19 );//название мелодии
@@ -260,13 +265,20 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
 
   while(1)//Ожидание нажатия кнопок
   {if ( button2.flagClick == true ){button2.flagClick = false;
-         destr(5,!constr(5));myOLED.setFont(SmallFont);
-         if(constr(5)){ myOLED.print("_ON ", 58, 19);//BOOL on/off
-                       myOLED.drawBitmap(112, 2, bm, 14, 10);
+         //myOLED.setFont(SmallFont);
+         if(!ts){ ts==!ts;//BOOL on/off
+                 myOLED.print("  ", 112, 3);// стирачка для галочки:)
+                 myOLED.print("  ", 113, 1);// стирачка для галочки:)
+                 myOLED.drawLine(3, 115, 7, 118);// треуголбник для кнопки плей
+                 myOLED.drawLine(11, 115, 7, 118);// -/-
+                 myOLED.drawLine(3, 115, 11, 115);// -/-
+                       //myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
                      }
-                    else {myOLED.print("_OFF", 58, 19);
-                    myOLED.print("  ", 112, 3);
-                    myOLED.print("  ", 113, 1);
+                    else {ts==!ts;//BOOL on/off
+                    myOLED.print("  ", 112, 3);//стирачка для галочки:)
+                    myOLED.print("  ", 113, 1);//стирачка для галочки:)
+                    myOLED.drawRect(3, 115, 11, 118);//вертикальные полоски для кнопки пауза
+                    myOLED.drawRect(3, 120, 11, 123);//вертикальные полоски для кнопки пауза  
                     }
        }
     if ( button1.flagClick == true ){// был клик кнопки 1
