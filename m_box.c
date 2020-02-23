@@ -170,7 +170,8 @@ static const MUSIC C_GENA[]PROGMEM = {
 
 void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии или указатель на мелодию?
 { MUSIC *bm ;
-   bool ts(0);
+   bool ts(0);//переменная для включения/выключения паузы в плеере
+   int n(0);//для расчета кол-ва нот в массиве
   if(m==5)
  {/// звуки для оформления
     // звук "Успешное включение"
@@ -217,15 +218,20 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
 }//if end
   else{switch (m)
       {
-        case 0: bm = ST_WARS;
+        case 0: {bm = ST_WARS; while(bm->note)n++;//вычисляем количество нот в мелодии
+                 bm = ST_WARS;}
           break;
-        case 1: bm = NOK_TUNE;
+        case 1: {bm = NOK_TUNE; while(bm->note)n++;//вычисляем количество нот в мелодии
+                 bm = NOK_TUNE;}
           break;
-        case 2: bm = PACMAN_1;
+        case 2: {bm = PACMAN_1; while(bm->note)n++;//вычисляем количество нот в мелодии
+                 bm = PACMAN_1;}
           break;
-        case 3: bm = PACMAN_2;
+        case 3: {bm = PACMAN_2; while(bm->note)n++;//вычисляем количество нот в мелодии
+                 bm = PACMAN_2;}
           break;
-        case 4: bm = C_GENA;
+        case 4: {bm = C_GENA; while(bm->note)n++;//вычисляем количество нот в мелодии
+                 bm = C_GENA;}
           break;
       }
      }
@@ -283,7 +289,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
        }
     if ( button1.flagClick == true ){// был клик кнопки 1
     //button1.flagClick = false;  // сброс признака
-        myOLED.setFont(SmallFont);
+        //myOLED.setFont(SmallFont);
         break;}
    myOLED.update();
  
