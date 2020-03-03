@@ -218,19 +218,19 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
 }//if end
   else{switch (m)
       {
-        case 0: {bm = ST_WARS; while(bm->note)n++;//вычисляем количество нот в мелодии
+        case 0: {bm = ST_WARS; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
                  bm = ST_WARS;}
           break;
-        case 1: {bm = NOK_TUNE; while(bm->note)n++;//вычисляем количество нот в мелодии
+        case 1: {bm = NOK_TUNE; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
                  bm = NOK_TUNE;}
           break;
-        case 2: {bm = PACMAN_1; while(bm->note)n++;//вычисляем количество нот в мелодии
+        case 2: {bm = PACMAN_1; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
                  bm = PACMAN_1;}
           break;
-        case 3: {bm = PACMAN_2; while(bm->note)n++;//вычисляем количество нот в мелодии
+        case 3: {bm = PACMAN_2; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
                  bm = PACMAN_2;}
           break;
-        case 4: {bm = C_GENA; while(bm->note)n++;//вычисляем количество нот в мелодии
+        case 4: {bm = C_GENA; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
                  bm = C_GENA;}
           break;
       }
