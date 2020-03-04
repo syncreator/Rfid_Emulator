@@ -171,7 +171,8 @@ static const MUSIC C_GENA[]PROGMEM = {
 void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии или указатель на мелодию?
 { MUSIC *bm ;
    bool ts(0);//переменная для включения/выключения паузы в плеере
-   int n(0);//для расчета кол-ва нот в массиве
+   int n(0),m(0);//для расчета кол-ва нот в массиве
+   float s;
   if(m==5)
  {/// звуки для оформления
     // звук "Успешное включение"
@@ -235,6 +236,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
           break;
       }
      }
+ s= (float)(110.0/(n-1));//вычисляем шаг в пикселях на шкале отрисовки сыгранных нот
  ///Отрисовка графики плеера
  myOLED.clrScr();
  myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);//кнопка стрелка
@@ -248,6 +250,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
  //myOLED.drawRoundRect(110, 0, 127, 13);
   myOLED.print("<PLAYER_app>", CENTER, 2);
  myOLED.print(melody_name,5,19 );//название мелодии
+ myOLED.drawRoundRect(9, 38, 119, 55);//Отрисовка шкалы процесинга проигрывателя
   //myOLED.drawBitmap(62,18, bm, 15, 14);
  /*if(alarm_flag){ myOLED.print("_ON", 62, 19);//BOOL on/off
                        myOLED.drawBitmap(112, 2, bm, 14, 10);
@@ -268,6 +271,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
  myOLED.drawRoundRect(82, 40, 87, 46);//точки между минутами/секундами
  myOLED.drawRoundRect(82, 50, 87, 56);*/
  //////////////////////////////////
+ 
 
   while(1)//Ожидание нажатия кнопок
   {if ( button2.flagClick == true ){button2.flagClick = false;
@@ -339,13 +343,10 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
     }
    noTone(Pin_tone);
 }//if end*/
-    else{
-    //Основной цикл воспроизведения
-     //for (int thisNote = 0; thisNote < sizeof(Array)/sizeof(Array[0]); thisNote++)
- int n(0); 
- while(bm->note)n++;//вычисляем количество нот в мелодии
- while(bm->note)
+    if(ts && m<(n-2))//если в режиме PLAY и сыграны не все ноты
+ //while(bm->note)
      {
+      m++;round(m*s)
     tone(Pin_tone, bx->note, bm->dur);
     //digitalWrite(13, HIGH);
     delay(bm->dur);
