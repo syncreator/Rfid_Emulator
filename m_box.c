@@ -346,7 +346,9 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
     if(ts && m<(n-2))//если в режиме PLAY и сыграны не все ноты
  //while(bm->note)
      {
-      m++;round(m*s)
+      m++;
+      myOLED.drawRoundRect(9, 40, 9+round(m*s), 53);
+      myOLED.printNumI((prevTime/60)%60, 50, 35,2,'0');round(m*s)
     tone(Pin_tone, bx->note, bm->dur);
     //digitalWrite(13, HIGH);
     delay(bm->dur);
