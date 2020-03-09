@@ -168,11 +168,12 @@ static const MUSIC C_GENA[]PROGMEM = {
   0,0,
 };
 
-void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии или указатель на мелодию?
+void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии, указатель на название мелодии
 { MUSIC *bm ;
    bool ts(0);//переменная для включения/выключения паузы в плеере
    int n(0),m(0);//для расчета кол-ва нот в массиве
-   float s;
+   float s;//расчет статуса проигрыша мелодии
+   unsigned long x;
   if(m==5)
  {/// звуки для оформления
     // звук "Успешное включение"
@@ -248,7 +249,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
   myOLED.drawRoundRect(1, 0, 17, 13);// квадраты отрисовки кнопок
   myOLED.drawRoundRect(110, 0, 127, 13);///-//-
  //myOLED.drawRoundRect(110, 0, 127, 13);
-  myOLED.print("<PLAYER_app>", CENTER, 2);
+  myOLED.print("<MUSIC_app>", CENTER, 2);
  myOLED.print(melody_name,5,19 );//название мелодии
  myOLED.drawRoundRect(9, 38, 119, 55);//Отрисовка шкалы процесинга проигрывателя
   //myOLED.drawBitmap(62,18, bm, 15, 14);
@@ -348,10 +349,17 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
      {
       m++;
       myOLED.drawRoundRect(9, 40, 9+round(m*s), 53);
-      myOLED.printNumI((prevTime/60)%60, 50, 35,2,'0');round(m*s)
+      myOLED.printNumI(round(m*s),15,56,3,'0');
+      myOLED.print("%", 40, 56);
     tone(Pin_tone, bx->note, bm->dur);
     //digitalWrite(13, HIGH);
-    delay(bm->dur);
+    //delay(bm->dur);
+      //начало блока вызова цикла задержки аналог delay()
+    { x=millis();
+      while((millis()-x)<(bm->dur)){if ( (button1.flagClick || button2.flagClick) == true )
+        // был клик кнопки 1
+        break;}
+    }
     //digitalWrite(13, LOW);
     //delay(pauseBetweenNotes/2);
   }
