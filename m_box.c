@@ -1,5 +1,7 @@
 #include <avr/pgmspace.h>
 #include <Arduino.h>
+#include <OLED_I2C.h>
+#include <Button.h>
 
 //Структура мелодии
 struct MUSIC{
@@ -294,7 +296,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
        }
     if ( button1.flagClick == true ){// был клик кнопки 1
     //button1.flagClick = false;  // сброс признака
-        //myOLED.setFont(SmallFont);
+        noTone(Pin_tone);
         break;}
    myOLED.update();
  
@@ -351,6 +353,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
       myOLED.drawRoundRect(9, 40, 9+round(m*s), 53);
       myOLED.printNumI(round(m*s),15,56,3,'0');
       myOLED.print("%", 40, 56);
+      myOLED.update();
     tone(Pin_tone, bx->note, bm->dur);
     //digitalWrite(13, HIGH);
     //delay(bm->dur);
@@ -363,7 +366,7 @@ void Music(byte m, byte Pin_tone, char* melody_name))//номер мелодии
     //digitalWrite(13, LOW);
     //delay(pauseBetweenNotes/2);
   }
-  noTone(Pin_tone);
+  else noTone(Pin_tone);
     }//else end
 
 }
