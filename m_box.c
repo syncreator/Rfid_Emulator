@@ -362,50 +362,7 @@ void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone,
  
 ///////////////////////////////////////// 
  
-/* if(m==5)
- {/// звуки для оформления
-    // звук "Успешное включение"
-    tone(Pin_tone, NOTE_A7); delay(100);
-    tone(Pin_tone, NOTE_G7); delay(100);
-    tone(Pin_tone, NOTE_E7); delay(100); 
-    tone(Pin_tone, NOTE_C7); delay(100);  
-    tone(Pin_tone, NOTE_D7); delay(100); 
-    tone(Pin_tone, NOTE_B7); delay(100); 
-    tone(Pin_tone, NOTE_F7); delay(100); 
-    tone(Pin_tone, NOTE_C7); delay(100);
-    noTone(Pin_tone); 
-    delay(2000);
-    
-// звук ОК
-    for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
-    noTone(Pin_tone);
-    delay(2000);
-  
-// звук "очередной шаг"
-    for (int i=2500; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(10); }
-    noTone(Pin_tone);
-    delay(2000);
-  
-// звук "ERROR"
-    for (int j=0; j <3; j++){
-    for (int i=1000; i<2000; i=i*1.1) { tone(Pin_tone, i); delay(10); }
-    delay(50);
-    for (int i=1000; i>500; i=i*1.9) { tone(Pin_tone, i); delay(10); }
-    delay(50);
-    }
-    noTone(Pin_tone);
-    delay(2000);
- //Звук Laser??
- for (int i = 5; i>1; i--) {
-      for (int j = 3; j > 0; j--) {
-        //analogWrite(ledPin, i*25);
-        tone(Pin_tone, round((j*i)*(100/4)), 50);
-        delay(50/10);
-      }
-      tone(Pin_tone, round((i)*(100/4)), 50);
-    }
-   noTone(Pin_tone);
-}//if end*/
+
     if(ts && k<(n-2))//если в режиме PLAY и сыграны не все ноты
  //while(bm->note)
      {
