@@ -278,6 +278,7 @@ void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone,
       tone(Pin_tone, round((i)*(100/4)), 50);
     }
    noTone(Pin_tone);
+   return;
 }//if end
   else{switch (m)
       {
@@ -413,12 +414,12 @@ void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone,
       myOLED.printNumI(round(k*s),15,56,3,'0');
       myOLED.print("%", 40, 56);
       myOLED.update();
-    tone(Pin_tone, bm->note, bm->dur);
+    tone(Pin_tone, (uint8_t)pgm_read_word(&(bm->note)), (uint8_t)pgm_read_word(&(bm->dur)));
     //digitalWrite(13, HIGH);
     //delay(bm->dur);
       //начало блока вызова цикла задержки аналог delay()
     { x=millis();
-      while((millis()-x)<(bm->dur)){if ( (button1.flagClick || button2.flagClick) == true )
+      while((millis()-x)<((uint8_t)pgm_read_word(&(bm->dur)))){if ( (button1.flagClick || button2.flagClick) == true )
         // был клик кнопки 1
         break;}
     }
