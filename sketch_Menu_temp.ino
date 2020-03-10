@@ -4,11 +4,14 @@
 #include <EEPROM.h>
 #include <OLED_I2C.h>
 #include "watch.h"
+#include "mbox.h"
 #include "pitches.h"
 
-#define LED_1_PIN    9   // светодиод подключен к выводу 9
+#define LED_1_PIN    9   // светодиод подключен к выводу 9 ????
+#define PIN_TONE     2  // кнопка подключена к выводу 1
 #define BUTTON_1_PIN 0  // кнопка подключена к выводу 0
 #define BUTTON_2_PIN 1  // кнопка подключена к выводу 1
+
 
 #define COUNT   16  // кол-во файлов меню 16
 #define FCOUNT  11  // кол-во файлов конфигменю 11
@@ -105,6 +108,7 @@ void wait(int);
 void scroll();
 void music();
 void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0);
+void Music(OLED &myOLED, Button &button1, Button &button2, byte m, byte Pin_tone, char* melody_name);
 
 void Enter_render();
 void Arow_render();
@@ -147,7 +151,7 @@ static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
   INT, 3, 1,    //10 Volume
 };
 
-int frequences[COUNT_NOTES] = {
+/*int frequences[COUNT_NOTES] = {
   392, 392, 392, 311, 466, 392, 311, 466, 392,
   587, 587, 587, 622, 466, 369, 311, 466, 392,
   784, 392, 392, 784, 739, 698, 659, 622, 659,
@@ -161,8 +165,8 @@ int durations[COUNT_NOTES] = {
   350, 250, 100, 350, 250, 100, 100, 100, 450,
   150, 350, 250, 100, 100, 100, 450,
   150, 350, 250, 100, 750
-};
-//Nokia_tune
+};*/
+
 int melody[] = { NOTE_E5, NOTE_D5, NOTE_F4, NOTE_G4, NOTE_C5, NOTE_B4, NOTE_D4, NOTE_E4, NOTE_B4, NOTE_A4, NOTE_C4, NOTE_E4, NOTE_A4 };
 int noteDurations[] = { 8, 8, 4, 4, 8, 8, 4, 4, 8, 8, 4, 4, 1 };
 int amountNotes = 13;
@@ -306,7 +310,7 @@ void scroll()
   else _i=128;
   }
 //////////////////////
-void music()
+/*void music()
 {
  /* for (int i = 0; i <= COUNT_NOTES; i++  ) { // Цикл от 0 до количества нот
     tone(Pin_tone, frequences[i], durations[i] * 2); // Включаем звук, определенной частоты
@@ -316,7 +320,7 @@ void music()
     noTone(Pin_tone); 
     delay(2000);*/
     //STAR WARS
-    tone(Pin_tone, 392, 350);
+    /*tone(Pin_tone, 392, 350);
 delay(350);
 tone(Pin_tone, 392, 350);
 delay(350);
@@ -489,149 +493,10 @@ tone(Pin_tone, NOTE_B4); delay(1000/16);
     tone(Pin_tone, NOTE_B5); delay(1000/8);
 noTone(Pin_tone); 
     delay(2000);
-//Spermario
-tone(11,660,100);
-delay(150);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,510,100);
-delay(100);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,770,100);
-delay(550);tone(Pin_tone,380,100);
-delay(574);tone(Pin_tone,510,100);
-delay(450);tone(Pin_tone,380,100);
-delay(400);tone(Pin_tone,320,100);
-delay(500);tone(Pin_tone,440,100);
-delay(300);tone(Pin_tone,480,80);
-delay(330);tone(Pin_tone,450,100);
-delay(150);tone(Pin_tone,430,100);
-delay(300);tone(Pin_tone,380,100);
-delay(200);tone(Pin_tone,660,80);
-delay(200);tone(Pin_tone,760,50);
-delay(150);tone(Pin_tone,860,100);
-delay(300);tone(Pin_tone,700,80);
-delay(150);tone(Pin_tone,760,50);
-delay(350);tone(Pin_tone,660,80);
-delay(300);tone(Pin_tone,520,80);
-delay(150);tone(Pin_tone,580,80);
-delay(150);tone(Pin_tone,480,80);
-delay(350);tone(Pin_tone,510,100);
-delay(550);tone(Pin_tone,380,100);
-delay(400);tone(Pin_tone,320,100);
-delay(500);tone(Pin_tone,440,100);
-delay(300);tone(Pin_tone,480,80);
-delay(330);tone(Pin_tone,450,100);
-delay(150);tone(Pin_tone,430,100);
-delay(300);tone(Pin_tone,380,100);
-delay(200);tone(Pin_tone,660,80);
-delay(200);tone(Pin_tone,760,50);
-delay(150);tone(Pin_tone,860,100);
-delay(300);tone(Pin_tone,700,80);
-delay(150);tone(Pin_tone,760,50);
-delay(350);tone(Pin_tone,660,80);
-delay(300);tone(Pin_tone,520,80);
-delay(150);tone(Pin_tone,580,80);
-delay(150);tone(Pin_tone,480,80);
-delay(500);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,760,100);
-delay(100);tone(Pin_tone,720,100);
-delay(150);tone(Pin_tone,680,100);
-delay(150);tone(Pin_tone,620,150);
-delay(300);tone(Pin_tone,650,150);
-delay(300);tone(Pin_tone,380,100);
-delay(150);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(100);tone(Pin_tone,570,100);
-delay(220);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,760,100);
-delay(100);tone(Pin_tone,720,100);
-delay(150);tone(Pin_tone,680,100);
-delay(150);tone(Pin_tone,620,150);
-delay(300);tone(Pin_tone,650,200);
-delay(300);tone(Pin_tone,1020,80);
-delay(300);tone(Pin_tone,1020,80);
-delay(150);tone(Pin_tone,1020,80);
-delay(300);tone(Pin_tone,380,100);
-delay(300);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,760,100);
-delay(100);tone(Pin_tone,720,100);
-delay(150);tone(Pin_tone,680,100);
-delay(150);tone(Pin_tone,620,150);
-delay(300);tone(Pin_tone,650,150);
-delay(300);tone(Pin_tone,380,100);
-delay(150);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(100);tone(Pin_tone,570,100);
-delay(220);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,760,100);
-delay(100);tone(Pin_tone,720,100);
-delay(150);tone(Pin_tone,680,100);
-delay(150);tone(Pin_tone,620,150);
-delay(300);tone(Pin_tone,650,200);
-delay(300);tone(Pin_tone,1020,80);
-delay(300);tone(Pin_tone,1020,80);
-delay(150);tone(Pin_tone,1020,80);
-delay(300);tone(Pin_tone,380,100);
-delay(300);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,760,100);
-delay(100);tone(Pin_tone,720,100);
-delay(150);tone(Pin_tone,680,100);
-delay(150);tone(Pin_tone,620,150);
-delay(300);tone(Pin_tone,650,150);
-delay(300);tone(Pin_tone,380,100);
-delay(150);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,430,100);
-delay(150);tone(Pin_tone,500,100);
-delay(100);tone(Pin_tone,570,100);
-delay(420);tone(Pin_tone,585,100);
-delay(550);tone(Pin_tone,550,100);
-delay(420);tone(Pin_tone,500,100);
-delay(360);tone(Pin_tone,380,100);
-delay(300);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,500,100);
-delay(150);tone(Pin_tone,500,100);
-delay(300);tone(Pin_tone,500,60);
-delay(150);tone(Pin_tone,500,80);
-delay(300);tone(Pin_tone,500,60);
-delay(350);tone(Pin_tone,500,80);
-delay(150);tone(Pin_tone,580,80);
-delay(350);tone(Pin_tone,660,80);
-delay(150);tone(Pin_tone,500,80);
-delay(300);tone(Pin_tone,430,80);
-delay(150);tone(Pin_tone,380,80);
-delay(600);tone(Pin_tone,500,60);
-delay(150);tone(Pin_tone,500,80);
-delay(300);tone(Pin_tone,500,60);
-delay(350);tone(Pin_tone,500,80);
-delay(150);tone(Pin_tone,580,80);
-delay(150);tone(Pin_tone,660,80);
-delay(450);tone(Pin_tone,870,80);
-delay(336);tone(Pin_tone,760,80);
-delay(600);tone(Pin_tone,500,60);
-delay(150);tone(Pin_tone,500,80);
-delay(300);tone(Pin_tone,500,60);
-delay(350);tone(Pin_tone,500,80);
-delay(150);tone(Pin_tone,580,80);
-delay(350);tone(Pin_tone,660,80);
-delay(150);tone(Pin_tone,500,80);
-delay(300);tone(Pin_tone,430,80);
-delay(150);tone(Pin_tone,380,80);
-delay(600);tone(Pin_tone,660,100);
-delay(150);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,510,100);
-delay(100);tone(Pin_tone,660,100);
-delay(300);tone(Pin_tone,770,100);
-delay(450);tone(Pin_tone,380,100);
-noTone(Pin_tone); 
-    delay(2000);
+
     
     //Сирена?
-    tone(Pin_tone, 700); // издаём звук на частоте 700 Гц
+   /* tone(Pin_tone, 700); // издаём звук на частоте 700 Гц
     delay(200);
     tone(Pin_tone, 500); // на частоте 500 Гц
     delay(200);
@@ -640,9 +505,9 @@ noTone(Pin_tone);
     tone(Pin_tone, 200); // на частоте 200 Гц
     delay(200);
     noTone(Pin_tone); 
-    delay(2000);
+    delay(2000);*//*
 
-}
+}*/
 
 //////
 void Pacman()
@@ -913,7 +778,10 @@ myOLED.printNumI(Config_flag, 56, 57);*/
  { //if(_Menu==0)//находимся в графическом меню
   {myOLED.drawBitmap(112, 2, check1_14x10, 14, 10);// блымка кнопки ентер при ее нажатии:)
            myOLED.update();
-           delay(50);
+           // звук ОК
+    for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
+    noTone(Pin_tone);
+           //delay(50);
           }
   if((_Pos==6&&_Menu==2)||(_Pos==6&&_Menu==5)||(_Pos==5&&_Menu==6))//выход в основное меню при выборе exit в папках
   {_Pos=_Menu; _Menu=0;
@@ -936,7 +804,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           break;
         case 6: Pacman();//Key_emulate();
           break;
-        case 7: music();//Music();
+        case 7: Music(myOLED, button1, button2,_Pos,PIN_TONE,plr(MName,_Pos-1));//Music();
           break;
       };
       if (((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_DFOLDER || ((uint8_t)pgm_read_word(&(MStruct[x].type)))==T_FOLDER)// может написать.. ==(T_DFOLDER || T_FOLDER)
@@ -969,13 +837,16 @@ myOLED.printNumI(Config_flag, 56, 57);*/
  }
 
  void Arow_render()
-     {if(Config_flag!=0)//????
+     { // звук "очередной шаг"
+    for (int i=2500; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(10); }
+    noTone(Pin_tone);
+      if(Config_flag!=0)//????
        {// if(Launch_APP!=0)return(0);//????
         int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//_Menu=6; g=11
          if(Config_flag==1)((_tes<((uint8_t)pgm_read_word(&(MStruct[g+_Pos-1].f_num))))?_tes++:_tes=1);
        myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);
            myOLED.update();
-           delay(50);
+           //delay(50);
             if(Config_flag==2)Config_app(2);else Config_app(0);
        //Config_app();
        }
@@ -984,7 +855,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           else
           {myOLED.drawBitmap(3, 2, arrow1_13x10, 13, 10);
            myOLED.update();
-           delay(50);
+           //delay(50);
            List_menu(_Menu,_Pos);
           }
         } 
