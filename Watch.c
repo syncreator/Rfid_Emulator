@@ -98,26 +98,33 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned
 }
 ///// alarm()
 void alarm()
-{if (alarm_flag && prevTime==alarm_time)while(1)
+{int g=-50000;
+  if (alarm_flag && prevTime==alarm_time)while(g<50000)
         {///Запускаем мелодию будильника
           // звук "ERROR"
-    for (int j=0; j <3; j++){
-    for (int i=1000; i<2000; i=i*1.1) { tone(Pin_tone, i); delay(10); }
+    for (int j=0; j <3; j++){myOLED.invert(true);
+    for (int i=1000; i<2000; i=i*1.1) { tone(Pin_tone, i);
+                                       if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
+                                       delay(10); }
     delay(50);
-    for (int i=1000; i>500; i=i*1.9) { tone(Pin_tone, i); delay(10); }
-    delay(50);
+    myOLED.invert(false);
+    for (int i=1000; i>500; i=i*0.9) { tone(Pin_tone, i); delay(10); }
+    delay(50);if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
     }
     noTone(Pin_tone);
     delay(2000);
  //Звук Laser??
  for (int i = 5; i>1; i--) {
+   if(g%2)myOLED.invert(true);else myOLED.invert(false);
       for (int j = 3; j > 0; j--) {
         //analogWrite(ledPin, i*25);
         tone(Pin_tone, round((j*i)*(100/4)), 50);
         delay(50/10);
-      }
+      }if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
       tone(Pin_tone, round((i)*(100/4)), 50);
     }
    noTone(Pin_tone);
-        }  
+   i++;
+   if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
+        } //end while() 
 }
