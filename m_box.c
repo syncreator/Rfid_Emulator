@@ -127,24 +127,6 @@ static const MUSIC NOK_TUNE[]PROGMEM = {
   NOTE_A4, 1000/1, //12
   0,0,
 };
-//Pacman_#1
-static const MUSIC PACMAN_1[]PROGMEM = {
-  NOTE_B5, 1000/6, //0
-  NOTE_B6, 1000/6, //1
-  NOTE_FS6, 1000/6, //2
-  NOTE_DS6, 1000/6, //3
-  NOTE_B6, 1000/6, //4
-  NOTE_F6, 1000/6, //5
-  NOTE_E6, 1000/6, //6
-  NOTE_C5, 1000/6, //7
-  NOTE_C6, 1000/6, //8
-  NOTE_G6, 1000/6, //9
-  NOTE_F5, 1000/6, //10
-  NOTE_C6, 1000/6, //11
-  NOTE_G6, 1000/6, //12 
-  NOTE_E6, 1000/6, //13
-  0,0,
-};
 //Pacman_#2
 static const MUSIC PACMAN_2[]PROGMEM = {
   NOTE_B4, 1000/16, //0
