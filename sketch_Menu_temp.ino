@@ -5,7 +5,7 @@
 #include <OLED_I2C.h>
 #include "watch.h"
 #include "mbox.h"
-#include "pitches.h"
+//#include "pitches.h"
 
 #define LED_1_PIN    9   // светодиод подключен к выводу 9 ????
 #define PIN_TONE     2  // кнопка подключена к выводу 1
@@ -71,15 +71,14 @@ int pacy;
 char b[16];
 unsigned long prevTime;  // предыдущее значение времени
 //unsigned long curTime;  // текущее значение времени
-const int Pin_tone = 2; // номер порта зуммера
+//const int Pin_tone = 2; // номер порта зуммера
 const byte COUNT_NOTES = 39; // Колличество нот
 
 //массив указателей на иконки меню.
 uint8_t* const fp[]PROGMEM = {pacman32, key1, torch, menu_alarm, menu_tunemaker, menu_settings, menu_sleep, menu_exit};
 char const KName[]PROGMEM = {"Home Work_1 Work_2 VIP_key Office_key Exit"};
-//char* const KeyName[]PROGMEM = {"Home", "Work_1", "Work_2", "VIP_key", "Office_key", "Exit"};
-char const MName[]PROGMEM = {"Star_Wars Melody#1 Melody#2 Melody#3 Melody#4 Exit"};
-char const CName[]PROGMEM = {"Time_Emulate Time_Read Exit Volume Exit Time Alarm_Time Alarm_Clock Exit Red Blue Green Brightness Program Exit"};
+char const MName[]PROGMEM = {"Star_Wars Nokia_tune Sys_ERROR Pacman Cro_Gena Exit"};
+char const CName[]PROGMEM = {"Time_Emulate Time_Read Exit Sound_chek Exit Time Alarm_Time Alarm_Clock Exit Red Blue Green Brightness Program Exit"};
 char const MENU_N[]PROGMEM = {"Main_Menu Key_Read Key_Emulate Torch Watch Music Config_menu Sleep Exit Key# Melody# RFID_Config Music_Config Watch_Config Torch_Config Exit"};
 //Структура меню
 struct MENU{
@@ -107,7 +106,7 @@ int constr(byte);
 void wait(int);
 void scroll();
 void music();
-void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0);
+void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, byte Pin_tone, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0);
 void Music(OLED &myOLED, Button &button1, Button &button2, byte m, byte Pin_tone, char* melody_name);
 
 void Enter_render();
@@ -140,7 +139,7 @@ static const MENU MStruct [COUNT]PROGMEM=
 static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
   T_1, 180, 4,  //0 Time_Emulate
   T_1, 180, 4,  //1 Time_Read
-  INT, 5, 2,    //2 Volume
+  BOOL,1, 0,    //2 Sound_chek
   T_2, 1440, 0, //3 Time_set
   T_2, 1440, 0, //4 Alarm_Time
   BOOL,1, 0,    //5 Alarm_Clock
@@ -151,30 +150,10 @@ static const CONFIG ConfigLim[FCOUNT]PROGMEM = {
   INT, 3, 1,    //10 Volume
 };
 
-/*int frequences[COUNT_NOTES] = {
-  392, 392, 392, 311, 466, 392, 311, 466, 392,
-  587, 587, 587, 622, 466, 369, 311, 466, 392,
-  784, 392, 392, 784, 739, 698, 659, 622, 659,
-  415, 554, 523, 493, 466, 440, 466,
-  311, 369, 311, 466, 392
-};
-//длительность нот
-int durations[COUNT_NOTES] = {
-  350, 350, 350, 250, 100, 350, 250, 100, 700,
-  350, 350, 350, 250, 100, 350, 250, 100, 700,
-  350, 250, 100, 350, 250, 100, 100, 100, 450,
-  150, 350, 250, 100, 100, 100, 450,
-  150, 350, 250, 100, 750
-};*/
-
-int melody[] = { NOTE_E5, NOTE_D5, NOTE_F4, NOTE_G4, NOTE_C5, NOTE_B4, NOTE_D4, NOTE_E4, NOTE_B4, NOTE_A4, NOTE_C4, NOTE_E4, NOTE_A4 };
-int noteDurations[] = { 8, 8, 4, 4, 8, 8, 4, 4, 8, 8, 4, 4, 1 };
-int amountNotes = 13;
-
 void setup()
 {
   pinMode(LED_1_PIN, OUTPUT);// определяем вывод светодиода как выход
-  pinMode(Pin_tone, OUTPUT);  // Настраиваем контакт на выход
+  pinMode(PIN_TONE, OUTPUT);  // Настраиваем контакт на выход
   // pinMode(BUTTON_1_PIN, INPUT_PULLUP);// определяем вывод кнопки 1 как вход
   // pinMode(BUTTON_2_PIN, INPUT_PULLUP); определяем вывод кнопки 2 как вход
   MsTimer2::set(2, timerInterupt); // задаем период прерывания по таймеру 2 мс
@@ -230,15 +209,19 @@ void setup()
   //Начало отчета времени для часов
   prevTime=Time(constr(3),constr(9)*65535+constr(10));//millis();  // предыдущее значение времени
   ///Мелодия загрузки-Nokia_tune
-  for (int thisNote = 0; thisNote < amountNotes; thisNote++) {
-    int noteDuration = 1000/noteDurations[thisNote];
-    tone(Pin_tone, melody[thisNote], noteDuration);
-    //digitalWrite(13, HIGH);
-    delay(noteDuration);
-    //digitalWrite(13, LOW);
-    //delay(pauseBetweenNotes/2);
-  }
-  noTone(Pin_tone);
+  if(constr(2))//проверка включен ли режим со звуком?
+    {// звук "Успешное включение"
+    tone(PIN_TONE, 3520); delay(100);
+    tone(PIN_TONE, 3136); delay(100);
+    tone(PIN_TONE, 2637); delay(100); 
+    tone(PIN_TONE, 2093); delay(100);  
+    tone(PIN_TONE, 2349); delay(100); 
+    tone(PIN_TONE, 3951); delay(100); 
+    tone(PIN_TONE, 2794); delay(100); 
+    tone(PIN_TONE, 2093); delay(100);
+    noTone(PIN_TONE);
+    delay(500);
+    }
 
 }
 
@@ -779,8 +762,8 @@ myOLED.printNumI(Config_flag, 56, 57);*/
   {myOLED.drawBitmap(112, 2, check1_14x10, 14, 10);// блымка кнопки ентер при ее нажатии:)
            myOLED.update();
            // звук ОК
-    for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
-    noTone(Pin_tone);
+    if(constr(2)){for (int i=400; i<6000; i=i*1.5) { tone(PIN_TONE, i); delay(20); }
+    noTone(PIN_TONE);}
            //delay(50);
           }
   if((_Pos==6&&_Menu==2)||(_Pos==6&&_Menu==5)||(_Pos==5&&_Menu==6))//выход в основное меню при выборе exit в папках
@@ -796,7 +779,7 @@ myOLED.printNumI(Config_flag, 56, 57);*/
           break;
         case 2: Pacman();//Torch();
           break;
-        case 3: Watch(myOLED, button1, button2, check_14x10, constr(3),constr(9)*65535+constr(10),constr(4),constr(5));
+        case 3: Watch(myOLED, button1, button2, check_14x10, PIN_TONE, constr(3),constr(9)*65535+constr(10),constr(4),constr(5));
           break;
         case 4: Pacman();//Sleep();
           break;
@@ -838,8 +821,8 @@ myOLED.printNumI(Config_flag, 56, 57);*/
 
  void Arow_render()
      { // звук "очередной шаг"
-    for (int i=2500; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(10); }
-    noTone(Pin_tone);
+    if(constr(2)){for (int i=2500; i<6000; i=i*1.5) { tone(PIN_TONE, i); delay(10); }
+    noTone(PIN_TONE);}
       if(Config_flag!=0)//????
        {// if(Launch_APP!=0)return(0);//????
         int g=((uint8_t)pgm_read_word(&(MStruct[_Menu].id_dot)));//_Menu=6; g=11
