@@ -55,13 +55,13 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, byte Pin
   myOLED.drawRoundRect(1, 15, 127, 29);
   myOLED.drawRoundRect(1, 31, 127, 63);
  //
- myOLED.drawRoundRect(40, 40, 45, 46);//точки между часами/минутами
- myOLED.drawRoundRect(40, 50, 45, 56);
+ //myOLED.drawRoundRect(40, 40, 45, 46);//точки между часами/минутами
+ //myOLED.drawRoundRect(40, 50, 45, 56);
  /*myOLED.drawCircle(42,43,3);
  myOLED.drawCircle(42,53,3);*/
  ///////
- myOLED.drawRoundRect(82, 40, 87, 46);//точки между минутами/секундами
- myOLED.drawRoundRect(82, 50, 87, 56);
+ //myOLED.drawRoundRect(82, 40, 87, 46);//точки между минутами/секундами
+ //myOLED.drawRoundRect(82, 50, 87, 56);
  /*myOLED.drawCircle(82,43,3);
  myOLED.drawCircle(82,53,3);*/
  //////////////////////////////////
@@ -98,9 +98,15 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, byte Pin
     else g++;
     if(constr(5))j=0;
     if(g%4)myOLED.invert(!p);//else myOLED.invert(false);
-    }else if(constr(5) && prevTime==alarm_time)j=10;
+    }else if(constr(5) && prevTime==alarm_time){j=10;}
+             myOLED.print("alarm_flag =", 3, 33);
+             myOLED.printNumI(constr(5), 77, 33, 2,'0');//Т_2
+             myOLED.print("alarm_time =", 3, 43);
+             myOLED.printNumI(alarm_time, 77, 43, 2,'0');//Т_2
+             myOLED.print("prevTime =",3, 53); 
+             myOLED.printNumI(prevTime, 77, 53, 2,'0');//Т_2
     ///////
-    if(prevTime!=Time(St_time,X_point)){prevTime=Time(St_time,X_point);
+    /*if(prevTime!=Time(St_time,X_point)){prevTime=Time(St_time,X_point);
                           
                             ///////////////////////////////////////////////////////
                             
@@ -114,6 +120,6 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, byte Pin
                              //myOLED.print(".", 78, 27);
                              myOLED.printNumI(prevTime%60,92 ,35,2,'0');//секунды
                              myOLED.update();
-    }
+    }*/
   }
 }
