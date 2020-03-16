@@ -30,8 +30,10 @@ unsigned long Time(unsigned long St_time=0, unsigned long X_point=0/*,unsigned l
 }
 ///////////////////////////////////////////
 
-void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0)//вывод часов на весь экран + будильник
+void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, byte Pin_tone, unsigned long St_time=0, unsigned long X_point=0, unsigned int alarm_time=0, int alarm_flag=0)//вывод часов на весь экран + будильник
 {unsigned long  prevTime=Time(St_time,X_point);
+ byte g(0),j(0);
+ boolean p=true;
  //Заголовок + инфа по будильнику и обрамление
  myOLED.clrScr();
  myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
@@ -42,10 +44,10 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned
   myOLED.print("<Watch_app>", CENTER, 2);
  myOLED.print("ALARM ->",5,19 );
   //myOLED.drawBitmap(62,18, bm, 15, 14);
- if(alarm_flag){ myOLED.print("_ON", 62, 19);//BOOL on/off
+ if(alarm_flag){ myOLED.print(" _ON", 58, 19);//BOOL on/off
                        myOLED.drawBitmap(112, 2, bm, 14, 10);
                      }
-                    else {myOLED.print("_OFF", 62, 19);
+                    else {myOLED.print("_OFF", 58, 19);
                     }
  myOLED.printNumI(alarm_time/60, 92, 19, 2,'0');//Т_2
                     myOLED.print(":",105,19);
@@ -67,7 +69,7 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned
   while(1)
   {if ( button2.flagClick == true ){button2.flagClick = false;
          destr(5,!constr(5));myOLED.setFont(SmallFont);
-         if(constr(5)){ myOLED.print("_ON ", 58, 19);//BOOL on/off
+         if(constr(5)){ myOLED.print(" _ON ", 58, 19);//BOOL on/off
                        myOLED.drawBitmap(112, 2, bm, 14, 10);
                      }
                     else {myOLED.print("_OFF", 58, 19);
@@ -79,6 +81,25 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned
     //button1.flagClick = false;  // сброс признака
         myOLED.setFont(SmallFont);
         break;}
+    ////////////// Будильник
+    if(j)
+    {if(g>8){g=0;j--;}
+    if(!g){tone(Pin_tone, 3520); delay(100);}
+    if(g==1){tone(Pin_tone, 3136); delay(100);}
+    if(g==2){tone(Pin_tone, 2637); delay(100);} 
+    if(g==3){tone(Pin_tone, 2093); delay(100);}  
+    if(g==4){tone(Pin_tone, 2349); delay(100);} 
+    if(g==5){tone(Pin_tone, 3951); delay(100);} 
+    if(g==6){tone(Pin_tone, 2794); delay(100);} 
+    if(g==7){tone(Pin_tone, 2093); delay(100);
+    noTone(Pin_tone);}
+            
+    if(g==8){if(prevTime!=Time(St_time,X_point))g++;}//delay(500);
+    else g++;
+    if(constr(5))j=0;
+    if(g%4)myOLED.invert(!p);//else myOLED.invert(false);
+    }else if(constr(5) && prevTime==alarm_time)j=10;
+    ///////
     if(prevTime!=Time(St_time,X_point)){prevTime=Time(St_time,X_point);
                           
                             ///////////////////////////////////////////////////////
@@ -95,36 +116,4 @@ void Watch(OLED &myOLED, Button &button1, Button &button2, uint8_t* bm, unsigned
                              myOLED.update();
     }
   }
-}
-///// alarm()
-void alarm()
-{int g=-50000;
-  if (alarm_flag && prevTime==alarm_time)while(g<50000)
-        {///Запускаем мелодию будильника
-          // звук "ERROR"
-    for (int j=0; j <3; j++){myOLED.invert(true);
-    for (int i=1000; i<2000; i=i*1.1) { tone(Pin_tone, i);
-                                       if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
-                                       delay(10); }
-    delay(50);
-    myOLED.invert(false);
-    for (int i=1000; i>500; i=i*0.9) { tone(Pin_tone, i); delay(10); }
-    delay(50);if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
-    }
-    noTone(Pin_tone);
-    delay(2000);
- //Звук Laser??
- for (int i = 5; i>1; i--) {
-   if(g%2)myOLED.invert(true);else myOLED.invert(false);
-      for (int j = 3; j > 0; j--) {
-        //analogWrite(ledPin, i*25);
-        tone(Pin_tone, round((j*i)*(100/4)), 50);
-        delay(50/10);
-      }if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
-      tone(Pin_tone, round((i)*(100/4)), 50);
-    }
-   noTone(Pin_tone);
-   i++;
-   if ( button1.flagClick == true )break;//выход по нажатию кнопки#1
-        } //end while() 
 }
