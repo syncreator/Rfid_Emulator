@@ -57,15 +57,15 @@
 #define NOTE_DS8 4978
 
 extern uint8_t SmallFont[];
-extern uint8_t BigNumbers[];
-extern uint8_t MediumNumbers[];
+//extern uint8_t BigNumbers[];
+//extern uint8_t MediumNumbers[];
 extern uint8_t arrow_13x10[];
-extern uint8_t check_14x10[];
+//extern uint8_t check_14x10[];
 
 //Структура мелодии
 struct MUSIC{
-  int note;
-  uint8_t dur;
+  uint16_t note;
+  uint16_t dur;
 };
 //Мелодии:
 static const MUSIC ST_WARS[]PROGMEM = {
@@ -127,6 +127,7 @@ static const MUSIC NOK_TUNE[]PROGMEM = {
   NOTE_A4, 1000/1, //12
   0,0,
 };
+
 //Pacman_#2
 static const MUSIC PACMAN_2[]PROGMEM = {
   NOTE_B4, 1000/16, //0
@@ -212,12 +213,12 @@ static const MUSIC C_GENA[]PROGMEM = {
 };
 
 void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone, char* melody_name)//номер мелодии, указатель на название мелодии
-{ MUSIC *bm ;
+{ MUSIC *bm;
    bool ts(0);//переменная для включения/выключения паузы в плеере
    int n(0),k(0);//для расчета кол-ва нот в массиве
    float s;//расчет статуса проигрыша мелодии
    unsigned long x;
-  if(m==5)
+  if(m==3)
  {/// звуки для оформления
     // звук "Успешное включение"
     tone(Pin_tone, NOTE_A7); delay(100);
@@ -229,17 +230,17 @@ void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone,
     tone(Pin_tone, NOTE_F7); delay(100); 
     tone(Pin_tone, NOTE_C7); delay(100);
     noTone(Pin_tone); 
-    delay(2000);
+    delay(1000);
     
 // звук ОК
-    for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
+   /* for (int i=400; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(20); }
     noTone(Pin_tone);
     delay(2000);
   
 // звук "очередной шаг"
     for (int i=2500; i<6000; i=i*1.5) { tone(Pin_tone, i); delay(10); }
     noTone(Pin_tone);
-    delay(2000);
+    delay(2000);*/
   
 // звук "ERROR"
     for (int j=0; j <3; j++){
@@ -249,123 +250,123 @@ void Music(OLED &myOLED, Button &button1, Button &button2,byte m, byte Pin_tone,
     delay(50);
     }
     noTone(Pin_tone);
-    delay(2000);
+    delay(1000);
  //Звук Laser??
- for (int i = 5; i>1; i--) {
-      for (int j = 3; j > 0; j--) {
+ for (int i = 25; i>1; i--) {
+      for (int j = 20; j > 0; j--) {
         //analogWrite(ledPin, i*25);
-        tone(Pin_tone, round((j*i)*(100/4)), 50);
-        delay(50/10);
+        tone(Pin_tone, round((j*i)*(100/4)), 40);
+        delay(40/10);
       }
-      tone(Pin_tone, round((i)*(100/4)), 50);
+      tone(Pin_tone, round((i)*(100/4)), 40);
     }
    noTone(Pin_tone);
    return;
 }//if end
   else{switch (m)
       {
-        case 0: {bm = ST_WARS; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
-                 bm = ST_WARS;}
+        case 1: {bm = ST_WARS; while((uint16_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
+                 bm-=n;}
           break;
-        case 1: {bm = NOK_TUNE; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
-                 bm = NOK_TUNE;}
+        case 2: {bm = NOK_TUNE; while((uint16_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
+                 bm-=n;}
           break;
-        case 2: {bm = PACMAN_1; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
-                 bm = PACMAN_1;}
+        /*case 3: {bm = PACMAN_1; while((uint16_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
+                 bm=bx = PACMAN_1;}
+          break;*/
+        case 4: {bm = PACMAN_2; while((uint16_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
+                 bm-=n;}
           break;
-        case 3: {bm = PACMAN_2; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
-                 bm = PACMAN_2;}
-          break;
-        case 4: {bm = C_GENA; while((uint8_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
-                 bm = C_GENA;}
+        case 5: {bm = C_GENA; while((uint16_t)pgm_read_word(&(bm->note))){n++;bm++;}//вычисляем количество нот в мелодии
+                 bm-=n;}
           break;
       }
      }
- s= (float)(110.0/(n-1));//вычисляем шаг в пикселях на шкале отрисовки сыгранных нот
- ///Отрисовка графики плеера
- myOLED.clrScr();
- myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);//кнопка стрелка
- //myOLED.drawBitmap(112, 2, check_14x10, 14, 10);///
- //myOLED.print("  ", 112, 3);// стирачка для галочки:)
- //myOLED.print("  ", 113, 1); // стирачка для галочки:)
-  myOLED.drawRect(3, 115, 11, 118);//вертикальные полоски для кнопки пауза
-  myOLED.drawRect(3, 120, 11, 123);//вертикальные полоски для кнопки пауза
-  myOLED.drawRoundRect(1, 0, 17, 13);// квадраты отрисовки кнопок
-  myOLED.drawRoundRect(110, 0, 127, 13);///-//-
- //myOLED.drawRoundRect(110, 0, 127, 13);
-  myOLED.print("<MUSIC_app>", CENTER, 2);
- myOLED.print(melody_name,5,19 );//название мелодии
- myOLED.drawRoundRect(9, 38, 119, 55);//Отрисовка шкалы процесинга проигрывателя
-  //myOLED.drawBitmap(62,18, bm, 15, 14);
- /*if(alarm_flag){ myOLED.print("_ON", 62, 19);//BOOL on/off
-                       myOLED.drawBitmap(112, 2, bm, 14, 10);
-                     }
-                    else {myOLED.print("_OFF", 62, 19);
-                    }
- myOLED.printNumI(alarm_time/60, 92, 19, 2,'0');//Т_2
-                    myOLED.print(":",105,19);
-                    myOLED.printNumI(alarm_time%60, 110, 19, 2,'0');
-  myOLED.drawRoundRect(1, 15, 127, 29);
-  myOLED.drawRoundRect(1, 31, 127, 63);*/
- //
- /*myOLED.drawRoundRect(40, 40, 45, 46);//точки между часами/минутами
- myOLED.drawRoundRect(40, 50, 45, 56);
- /*myOLED.drawCircle(42,43,3);
- myOLED.drawCircle(42,53,3);
- ///////
- myOLED.drawRoundRect(82, 40, 87, 46);//точки между минутами/секундами
- myOLED.drawRoundRect(82, 50, 87, 56);*/
- //////////////////////////////////
- 
+ s= (float)(113.0/n);//вычисляем шаг в пикселях на шкале отрисовки сыгранных нот
 
   while(1)//Ожидание нажатия кнопок
-  {if ( button2.flagClick == true ){button2.flagClick = false;
+  {if(k==0&&ts==0){
+    ///Отрисовка графики плеера
+ myOLED.clrScr();
+ myOLED.drawRoundRect(1, 26, 127, 63);
+ myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);//кнопка стрелка
+ myOLED.drawLine( 116,3, 122,7);// треугольник для кнопки плей
+  myOLED.drawLine( 116,11,122,7);// -/-
+  myOLED.drawLine( 116,3,116,11);// -/-
+  myOLED.drawRoundRect(1, 0, 17, 13);// квадраты отрисовки кнопок
+  myOLED.drawRoundRect(110, 0, 127, 13);///-//-
+  myOLED.print("<MUSIC_app>", CENTER, 2);
+  myOLED.print("Play", 104, 15);
+  myOLED.print("Exit", 1, 15);
+ myOLED.print(melody_name,9,30 );//название мелодии
+ myOLED.drawRoundRect(8, 44, 121, 53);//Отрисовка шкалы процесинга проигрывателя
+ myOLED.update();
+    }
+    if ( button2.flagClick == true ){button2.flagClick = false;
          //myOLED.setFont(SmallFont);
-         if(!ts){ ts==!ts;//BOOL on/off
-                 myOLED.print("  ", 112, 3);// стирачка для галочки:)
-                 myOLED.print("  ", 113, 1);// стирачка для галочки:)
-                 myOLED.drawLine(3, 115, 7, 118);// треуголбник для кнопки плей
-                 myOLED.drawLine(11, 115, 7, 118);// -/-
-                 myOLED.drawLine(3, 115, 11, 115);// -/-
-                       //myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
+         if(!ts){ ts=!ts/*1*/;//BOOL on/off
+                 myOLED.print("  ", 112, 4);// стирачка для галочки:)
+                 myOLED.print("  ", 114, 4);// стирачка для галочки:)
+                 myOLED.print("  ", 112, 2);// стирачка для галочки:)
+                 myOLED.print("  ", 114, 2);// стирачка для галочки:)
+                 myOLED.drawRect(114,2, 117,11);//вертикальные полоски для кнопки пауза
+                 myOLED.drawRect(120,2, 123,11);//вертикальные полоски для кнопки пауза
+                 myOLED.print("Stop", 104, 15);
                      }
-                    else {ts==!ts;//BOOL on/off
-                    myOLED.print("  ", 112, 3);//стирачка для галочки:)
-                    myOLED.print("  ", 113, 1);//стирачка для галочки:)
-                    myOLED.drawRect(3, 115, 11, 118);//вертикальные полоски для кнопки пауза
-                    myOLED.drawRect(3, 120, 11, 123);//вертикальные полоски для кнопки пауза  
+                    else {ts=!ts/*0*/;//BOOL on/off
+                    myOLED.print("  ", 112, 4);//стирачка для галочки:)
+                    myOLED.print("  ", 114, 4);//стирачка для галочки:)
+                    myOLED.print("  ", 112, 2);// стирачка для галочки:)
+                 myOLED.print("  ", 114, 2);// стирачка для галочки:)
+                    myOLED.drawLine( 116,3, 122,7);// треугольник для кнопки плей
+                    myOLED.drawLine( 116,11,122,7);// -/-
+                    myOLED.drawLine( 116,3,116,11);// -/-
+                    myOLED.print("Play", 104, 15); 
                     }
        }
     if ( button1.flagClick == true ){// был клик кнопки 1
     //button1.flagClick = false;  // сброс признака
         noTone(Pin_tone);
         break;}
+        ////////
+ /*myOLED.print("_Pos=", 5, 14);myOLED.printNumI(m, 60,14);
+ myOLED.print(" n=",5,22);myOLED.printNumI(n,60,22);
+ myOLED.print(" s=", 5, 30);myOLED.printNumF(s,3,60,30);
+ myOLED.print("ts=", 5, 38);myOLED.printNumI(ts, 60,38);
+ //myOLED.print("round(k*s)",2, 46);myOLED.printNumI(round(k*s),60,46);
+myOLED.print("pgm=", 5, 46);myOLED.printNumI((uint16_t)pgm_read_word(&(bm->note)), 60,46);
+myOLED.print("bm->note=", 2, 54);myOLED.printNumI(bm->note, 60,54);*/
+ 
+        ////////
    myOLED.update();
  
 ///////////////////////////////////////// 
  
 
-    if(ts && k<(n-2))//если в режиме PLAY и сыграны не все ноты
+    if(ts && k<n)//если в режиме PLAY и сыграны не все ноты
  //while(bm->note)
      {
       k++;
-      myOLED.drawRoundRect(9, 40, 9+round(k*s), 53);
-      myOLED.printNumI(round(k*s),15,56,3,'0');
-      myOLED.print("%", 40, 56);
+      myOLED.drawRoundRect(9, 46, 9+round(k*s), 51);
+      myOLED.printNumI(round(k*s*0.8849),70,30,3);
+      myOLED.print("%", 96, 30);
       myOLED.update();
-    tone(Pin_tone, (uint8_t)pgm_read_word(&(bm->note)), (uint8_t)pgm_read_word(&(bm->dur)));
+    tone(Pin_tone, (uint16_t)pgm_read_word(&(bm->note)), (uint16_t)pgm_read_word(&(bm->dur)));
     //digitalWrite(13, HIGH);
     //delay(bm->dur);
       //начало блока вызова цикла задержки аналог delay()
     { x=millis();
-      while((millis()-x)<((uint8_t)pgm_read_word(&(bm->dur)))){if ( (button1.flagClick || button2.flagClick) == true )
+      while((millis()-x)<((uint16_t)pgm_read_word(&(bm->dur)))){if ( (button1.flagClick || button2.flagClick) == true )
         // был клик кнопки 1
         break;}
-    }
+    }bm++;
     //digitalWrite(13, LOW);
     //delay(pauseBetweenNotes/2);
-  }
-  else noTone(Pin_tone);
+    }
+  else {noTone(Pin_tone);
+        if(k==n){k=0;bm-=n;ts=!ts;
+                }
+       }
     }//else end
 
 }
