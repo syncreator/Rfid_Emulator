@@ -36,13 +36,14 @@ pinMode( led_pin_blue2,  OUTPUT);
      digitalWrite( led_pin_blue2,  HIGH);
     };   
    if(del)//проверка на 
-     {wait(del*50));//меняем частоту мерцания
+     {wait(del*50);//время свечения импульса
      digitalWrite( led_pin_red1, LOW);
      digitalWrite( led_pin_red2, LOW);
      digitalWrite( led_pin_green1, LOW);
      digitalWrite( led_pin_green2, LOW);
      digitalWrite( led_pin_blue1, LOW);
      digitalWrite( led_pin_blue2, LOW);
+     wait(del*50);////задержка между импульсами света
      }
     if ( button1.flagClick == true ){// был клик кнопки 1
       //button1.flagClick = false;  // сброс признака
@@ -66,3 +67,19 @@ for (int x=0; x<6; x++) { // цикл 6 проходов
         status = !status; // передаем слово (меняем текущий пин) меняем false на true и наоборот;
     open = !open; //меняем false на true и наоборот;
    }                      
+////Вариант сирены(звук)
+
+  for(int i=0;i<8;i++)
+  {
+   tone(Pin_tone, 3520);
+    delayMicroseconds(i*160);       
+    delayMicroseconds(i*160); 
+  }
+   for(int i=8;i>0;i--)
+  {
+    tone(Pin_tone, 1397);
+    delayMicroseconds(i*160);       
+    delayMicroseconds(i*160); 
+  }
+
+  
