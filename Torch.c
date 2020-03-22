@@ -1,9 +1,9 @@
-int led_pin_red1 = 5; // пин подключения светика red1
-int led_pin_red2 = 5; // пин подключения светика red2
-int led_pin_green1 = 5; // пин подключения светика green1
-int led_pin_green2 = 5; // пин подключения светика green2
+int led_pin_red1 = 4; // пин подключения светика red1
+int led_pin_red2 = 7; // пин подключения светика red2
+int led_pin_green1 = 6; // пин подключения светика green1
+int led_pin_green2 = 9; // пин подключения светика green2
 int led_pin_blue1 = 5; // пин подключения светика blue1
-int led_pin_blue2 = 5; // пин подключения светика blue2
+int led_pin_blue2 = 12; // пин подключения светика blue2
 ////
 boolean status = true; // флаг, что активна левая
 boolean open = true; // флаг, включения
@@ -23,7 +23,9 @@ pinMode( led_pin_blue2,  OUTPUT);
   while(1)
   {if ( button2.flagClick == true ){button2.flagClick = false;
           if(del>10)del=0;else del++;}
-    if(constr(red))
+   
+   if (open)// если true
+   { if(constr(red))
     {digitalWrite( led_pin_red1, HIGH);
      digitalWrite( led_pin_red2, HIGH);
     };
@@ -33,9 +35,12 @@ pinMode( led_pin_blue2,  OUTPUT);
     };
    if(constr(blue))
     {digitalWrite( led_pin_blue1,  HIGH);
-     digitalWrite( led_pin_blue2,  HIGH);
-    };   
-   if(del)//проверка на 
+     digitalWrite( led_pin_blue2,  HIGH); //
+    };
+     open = !open; //меняем статус-пины включены
+  }
+     else // иначе
+  { if(del)//проверка на наличие задержки между импульсами(при del=0 горит все время)
      {wait(del*50);//время свечения импульса
      digitalWrite( led_pin_red1, LOW);
      digitalWrite( led_pin_red2, LOW);
@@ -44,7 +49,9 @@ pinMode( led_pin_blue2,  OUTPUT);
      digitalWrite( led_pin_blue1, LOW);
      digitalWrite( led_pin_blue2, LOW);
      wait(del*50);////задержка между импульсами света
+      open = !open; //меняем статус-пины выключены
      }
+  }
     if ( button1.flagClick == true ){// был клик кнопки 1
       //button1.flagClick = false;  // сброс признака
      digitalWrite( led_pin_red1, LOW);
@@ -54,7 +61,7 @@ pinMode( led_pin_blue2,  OUTPUT);
      digitalWrite( led_pin_blue1, LOW);
      digitalWrite( led_pin_blue2, LOW);
         break;}
-  }
+  }// while() END
 ////
 ////-Полицейская мигалка поочереди двумя диодами
 for (int x=0; x<6; x++) { // цикл 6 проходов
