@@ -48,8 +48,8 @@ pinMode( led_pin_blue2,  OUTPUT);
      digitalWrite( led_pin_green2, LOW);
      digitalWrite( led_pin_blue1, LOW);
      digitalWrite( led_pin_blue2, LOW);
-     wait(del*50);////задержка между импульсами света
       open = !open; //меняем статус-пины выключены
+     wait(del*50);////задержка между импульсами света
      }
   }
     if ( button1.flagClick == true ){// был клик кнопки 1
@@ -69,7 +69,7 @@ for (int x=0; x<6; x++) { // цикл 6 проходов
         digitalWrite(status ? led_3 : led_5, HIGH); // если status == false то падаем на пин 3 иначе на пин 5
     else // иначе
       digitalWrite(status ? led_3 : led_5, LOW); // если status == false то падаем на пин 3 иначе на пин 5
-    delay(interval[x]); // Ждем 
+    delay(120); // Ждем 
      if (x == 5) // если последний проход по циклу
         status = !status; // передаем слово (меняем текущий пин) меняем false на true и наоборот;
     open = !open; //меняем false на true и наоборот;
