@@ -20,4 +20,27 @@ Serial.print(", ");
   }
  }
 }
-
+/////// Строчный вариант
+#include <SoftwareSerial.h>
+ 
+SoftwareSerial rdm6300(7, 8);
+String s = "";
+ 
+void setup() {
+  rdm6300.begin(9600);
+  Serial.begin(9600);
+}
+ 
+void loop() {
+  if (rdm6300.available() > 0) {
+    while (rdm6300.available() > 0) {
+      char c = rdm6300.read();
+      s += c;
+      delay(3);
+    }
+ 
+    Serial.println(s);
+    s = "";
+  }
+}
+/////// Еще вариант
