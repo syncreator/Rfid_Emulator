@@ -48,11 +48,90 @@ void loop() {
     s = "";
   }
 }
-/////// Еще вариант
+/////// Прилага для считывания rfid ключей
 void rdm6300_read(OLED &myOLED, Button &button1, Button &button2, byte m, byte RDM6300_Pin)
-{ digitalWrite( RDM6300_Pin,  HIGH);//Включаем rdm6300
+{int count(0); 
+ digitalWrite( RDM6300_Pin,  HIGH);//Включаем rdm6300
   wait(2000);//ждем пока включиться
-  Pacman()//Запускаем Pacman пока rdm6300 не выдаст 14 битов?
+  //Запускаем Pacman пока rdm6300 не выдаст 14 битов?
+ { myOLED.clrScr();
+  for (int pc = 0; pc < 3; pc++)
+  {
+    if ( button1.flagClick == true )
+        // был клик кнопки 1
+        break;
+    pacy = random(20, 44);
+    //int j=0;
+    for (int i = -20,j=0; i < 132; i++,j++)
+    {
+      if ( button1.flagClick == true )
+        // был клик кнопки 1
+        break;
+      myOLED.clrScr();
+      for (int p = 6; p > ((i + 20) / 20); p--)
+      {
+        if ( button1.flagClick == true )
+          // был клик кнопки 1
+          break;
+        if (random(0, 100) % 2)myOLED.print("0", p * 20 - 8, pacy + 7);
+        else myOLED.print("1", p * 20 - 8, pacy + 7); //drawBitmap(p*20-8, pacy+7, "1", 5, 5);
+      }
+      if ( button1.flagClick == true )
+        // был клик кнопки 1
+        break;
+      switch (((i + 20) / 3) % 4)
+      {
+        case 0: bm = pacman1;
+          break;
+        case 1: bm = pacman2;
+          break;
+        case 2: bm = pacman3;
+          break;
+        case 3: bm = pacman2;
+          break;
+      }
+      myOLED.drawBitmap(i, pacy, bm, 20, 20);
+      if (j<=3)myOLED.print("KEY READ      ", CENTER, 0);
+      if ((j>3)&&(j<=6))myOLED.print("KEY READ .    ", CENTER, 0);
+      if ((j>6)&&(j<=9))myOLED.print("KEY READ . .  ", CENTER, 0);
+      if ((j>9)&&(j<=12))myOLED.print("KEY READ . . .", CENTER, 0);
+      if (j==12)j=0;
+      myOLED.update();
+     
+     //Begin rdm6300 read
+     /*if (RfidReader.available() > 0)
+  {count++;
+//num = RfidReader.read();
+Serial.print(/*num*//*RfidReader.read(), DEC);
+    if(count >= 14)
+    {Serial.println(' ');
+     count = 0;}
+  else {
+Serial.print(", ");
+  }
+ }*///END of rdm6300 read
+      //delay(10);
+     //wait(int t)
+     {unsigned long x=millis();
+ while((millis()-x)<10/*t*/){if ( (button1.flagClick || button2.flagClick) == true )break;
+        // был клик кнопки 1
+     if (RfidReader.available() > 0)
+  {count++;
+//num = RfidReader.read();
+Serial.print(/*num*/RfidReader.read(), DEC);
+    if(count >= 14)
+    {Serial.println(' ');
+     count = 0;}
+  else {
+Serial.print(", ");
+       }
+  }
+ }//END while()
+}//END wait()
+    }
+  }
+  //if(button1.flagClick==false)button2.flagClick = true;
+}//END Pacman()
   //основной цикл отрисовки прилаги
    while(1)
   { ///Отрисовка графики плеера
