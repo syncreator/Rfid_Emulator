@@ -137,18 +137,22 @@ Serial.print(", ");
    while(1)
   { ///Отрисовка графики плеера
  myOLED.clrScr();
- myOLED.drawRoundRect(1, 26, 127, 63);
+ myOLED.drawRoundRect(1, 26, 127, 63);//граница основного инфо-поля 
  myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);//кнопка стрелка
- myOLED.drawLine( 116,3, 122,7);// треугольник для кнопки плей
-  myOLED.drawLine( 116,11,122,7);// -/-
-  myOLED.drawLine( 116,3,116,11);// -/-
   myOLED.drawRoundRect(1, 0, 17, 13);// квадраты отрисовки кнопок
   myOLED.drawRoundRect(110, 0, 127, 13);///-//-
-  myOLED.print("<MUSIC_app>", CENTER, 2);
-  myOLED.print("Play", 104, 15);
+  myOLED.print("<RFID_app>", CENTER, 2);
+  myOLED.print("Save", 104, 15);
   myOLED.print("Exit", 1, 15);
- myOLED.print(melody_name,9,30 );//название мелодии
- myOLED.drawRoundRect(8, 44, 121, 53);//Отрисовка шкалы процесинга проигрывателя
+ myOLED.print("NEW", CENTER, 28);//Заголовок -первая строка
+ myOLED.print("Key Detected:)", CENTER, 37);//Заголовок -вторая строка
+ myOLED.print("HEX", 6, 46);//
+ for()
+ myOLED.printNumI(,60,46);
+ myOLED.print("DEC", 6, 54);//
+ myOLED.drawLine( 28,46, 28,62);//крест разделения полей HEX/DEC
+ myOLED.drawLine( 6,53, 122,53);//-//-
+ //myOLED.drawRoundRect(8, 44, 121, 53);//Отрисовка шкалы процесинга проигрывателя
  myOLED.update();
     }
     if ( button2.flagClick == true ){button2.flagClick = false;
