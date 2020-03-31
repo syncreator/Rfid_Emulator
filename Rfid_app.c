@@ -1,8 +1,8 @@
 #include <SoftwareSerial.h>
-#define RDM6300_PIN    9   // светодиод подключен к выводу 9 ????
+#define RDM6300_PIN    9   // Пин подключающий питание на RDM
 
 SoftwareSerial RfidReader(0, 1);
-int num;
+int num[];
 int count = 0;
 
 void setup(){
@@ -49,8 +49,9 @@ void loop() {
   }
 }
 /////// Прилага для считывания rfid ключей
-void rdm6300_read(OLED &myOLED, Button &button1, Button &button2, byte m, byte RDM6300_Pin)
-{int count(0); 
+void rdm6300_read(OLED &myOLED, Button &button1, Button &button2, byte m, byte RDM6300_Pin)//m - передача параметра из конфигов(если понадобиться)
+{int count(0);
+ int num[14];
  digitalWrite( RDM6300_Pin,  HIGH);//Включаем rdm6300
   wait(2000);//ждем пока включиться
   //Запускаем Pacman пока rdm6300 не выдаст 14 битов?
@@ -116,20 +117,20 @@ Serial.print(", ");
  while((millis()-x)<10/*t*/){if ( (button1.flagClick || button2.flagClick) == true )break;
         // был клик кнопки 1
      if (RfidReader.available() > 0)
-  {count++;
-//num = RfidReader.read();
-Serial.print(/*num*/RfidReader.read(), DEC);
+  {num[count++] = RfidReader.read();
+Serial.print(num[count-1], DEC);
     if(count >= 14)
     {Serial.println(' ');
-     count = 0;}
+     count = -1;}
   else {
 Serial.print(", ");
        }
   }
  }//END while()
 }//END wait()
-    }
-  }
+    if(count<0)break;}
+  if(count<0)break;}
+  if(count<0)break;//выход из Pacman() по факту заполнения массива ключа
   //if(button1.flagClick==false)button2.flagClick = true;
 }//END Pacman()
   //основной цикл отрисовки прилаги
