@@ -48,7 +48,7 @@ Serial.begin(9600); //?????????
     if ( button1.flagClick == true )
         // был клик кнопки 1
         break;
-        if (Serial/*RfidReader*/.available()>0)break;
+        if (Serial/*RfidReader*/.available()>13)break;
     pacy = random(20, 44);
     //int j=0;
     for (int i = -20,j=0; i < 132; i++,j++)
@@ -56,21 +56,21 @@ Serial.begin(9600); //?????????
       if ( button1.flagClick == true )
         // был клик кнопки 1
         break;
-        if (Serial/*RfidReader*/.available()>0)break;
+        if (Serial/*RfidReader*/.available()>13)break;
       myOLED.clrScr();
       for (int p = 6; p > ((i + 20) / 20); p--)
       {
         if ( button1.flagClick == true )
           // был клик кнопки 1
           break;
-          if (Serial/*RfidReader*/.available() > 0)break;
+          if (Serial/*RfidReader*/.available() >13)break;
         if (random(0, 100) % 2)myOLED.print("0", p * 20 - 8, pacy + 7);
         else myOLED.print("1", p * 20 - 8, pacy + 7); //drawBitmap(p*20-8, pacy+7, "1", 5, 5);
       }
       if ( button1.flagClick == true )
         // был клик кнопки 1
         break;
-        if (Serial/*RfidReader*/.available() > 0)break;
+        if (Serial/*RfidReader*/.available() > 13)break;
       switch (((i + 20) / 3) % 4)
       {
         case 0: bm = pacman1;
@@ -91,7 +91,7 @@ Serial.begin(9600); //?????????
       myOLED.update();
      
      //Begin rdm6300 read
-     if (Serial/*RfidReader*/.available() > 0)break;
+     if (Serial/*RfidReader*/.available() >13)break;
       //delay(10);
      //wait(int t)
      {unsigned long x=millis();
@@ -104,20 +104,47 @@ Serial.begin(9600); //?????????
 }//END Pacman()
  //if (Serial/*RfidReader*/.available() > 0)
  //delay(100);
-  if (Serial.available())
-    {{unsigned long x=millis();
- while((millis()-x)<10/*t*/){}};//???
-     Serial.print("ID: ");
+ digitalWrite( RDM6300_Pin, LOW);//выключаем rdm6300LOW
+ //-------------------------------
+   bool flag_s = true;
+   while(Serial.available())
+   { if(Serial.peek()==2 && flag_s)
+     {Serial.print("ID: ");
       for(int j=0; j<14; j++)
       {
       num[j]=Serial.read();
       Serial.print(num[j]);
       Serial.print(",");
       }
-      Serial.println();
-      Serial.flush();   
+      //check sum test
+      if (num[0] == 2 && num[13] == 3) // packet starts with STX and ends with ETX
+        {
+           byte checksum = 0;
+        for (int i = 0; i < 6; i++) { // data with checksum
+          checksum ^= ascii_num(num[i*2+1]) * 16 + ascii_num(num[i*2+2]);
+        }
+        if (checksum == 0)
+        { flag_s=!flag_s;
+          Serial.println("Checksum OK!");
+          Serial.print("ID: ");
+          for (int i = 1; i <= 10; i++) {
+            Serial.print(num[i],DEC);
+          }
+          Serial.println();
+        } 
+        else 
+         {
+          Serial.println("Checksum ERROR!");
+         }
+       }
+      else Serial.println("Key ERROR!");
      }
-    //goto begin;
+     else Serial.read();
+       
+   }
+   // {{unsigned long x=millis();
+// while((millis()-x)<10/*t*/){}};//???
+
     
  /*while(count<14 ){
  num[count] = RfidReader.read();
@@ -173,7 +200,7 @@ Serial.begin(9600); //?????????
  myOLED.drawLine( 6,52, 122,52);//-//-
  //myOLED.drawRoundRect(8, 44, 121, 53);//Отрисовка шкалы процесинга проигрывателя
  myOLED.update();
- digitalWrite( RDM6300_Pin, LOW);//выключаем rdm6300LOW
+ //digitalWrite( RDM6300_Pin, LOW);//выключаем rdm6300LOW
  //delay(500);
   while(1/*!button2.flagClick*/)//проверка нажатия кнопок
     {if ( button2.flagClick == true ){button2.flagClick = false;
