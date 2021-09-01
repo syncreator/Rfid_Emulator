@@ -144,42 +144,14 @@ Serial.begin(9600); //?????????
    }
    // {{unsigned long x=millis();
 // while((millis()-x)<10/*t*/){}};//???
-
-    
- /*while(count<14 ){
- num[count] = RfidReader.read();
- if (count == 0 && num[0] != 2) {
-      Serial.println("Out of sync!");// do not increment counter
-      RfidReader.flush();//очистка буфера
-      goto begin;
-    } else count++;
- //Serial.print(num[count], DEC);
- if(count==13)
- if (num[0] == 2 && num[13] == 3) { // packet starts with STX and ends with ETX
-        byte checksum = 0;
-        for (int i = 0; i < 6; i++) { // data with checksum
-          checksum ^= ascii_num(num[i*2+1]) * 16 + ascii_num(num[i*2+2]);
-        }
-        if (checksum == 0) {
-          Serial.print("ID: ");
-          for (int i = 1; i <= 10; i++) {
-            Serial.print(num[i],DEC);
-          }
-          Serial.println();
-        } else {
-          Serial.println("Checksum ERROR!");
-          RfidReader.flush();//очистка буфера
-          goto begin;
-        }
-      } else {
-          Serial.println("Incorrect packet!");
-          RfidReader.flush();//очистка буфера
-          goto begin;
-      }
- }*/
- //else goto begin;
-  //основной цикл отрисовки прилаги
-   //while(1)
+//---------------------
+for(int i=1,j=0;i<N;)//N-quantity Key in Menu
+{
+    if(EEPROM[30*i+j]==num[i])j++;
+    else i++;
+    if(j>10)std::cout << "Already saved as:" <<i<< std::endl;
+}
+//------------------------   
    ///Отрисовка графики прилаги
  myOLED.clrScr();
  myOLED.drawRoundRect(1, 24, 127, 63);//граница основного инфо-поля 
