@@ -185,9 +185,9 @@ for(int i=1,j=0;i<N;)//N-quantity Key in Menu
     if ( button1.flagClick == true ){// был клик кнопки 1
     button1.flagClick = false;  // сброс признака, ОБЯЗАТЕЛЬНОЕ!!! условие выхода из цикла
       //  break;}
-      }
+      }//??? END While(1)
 // myOLED.update();
- 
+ //сдесь необходимо ставить break по условию нажатия кнопки #1 для выхода из Main While!!! без сброса признака, так как прорисовка основного Меню сразу необходима
    }//END While(1)
 }//END Main While!!!
   //выключаем RDM6300
@@ -199,4 +199,44 @@ byte ascii_num(byte a) {
   a -= '0'; // 0..9
   if (a > 9) a -= 7; // A..F
   return a;
+}
+//////
+//Прорисовка списка Имен и кода ключей
+void List_key(byte t)
+{//byte m - статус положения курсора в списке и считыванеия неизвестного ключа для входа в меню сохранения нового ключа
+ // =0 -ключ известен или уже сохранен в память
+ // =1-5 -новый ключ считан! число определяет положение курсора в списке ключей 
+  
+myOLED.clrScr();
+myOLED.drawBitmap(3, 2, arrow_13x10, 13, 10);
+myOLED.drawBitmap(112, 2, check_14x10, 14, 10);
+myOLED.drawRoundRect(1, 0, 17, 13);
+myOLED.drawRoundRect(110, 0, 127, 13);
+myOLED.print("<RFID_app>", CENTER, 0);
+myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенного пункта меню
+ int i(0),y(0), //g=(uint8_t)pgm_read_word(&(MStruct[m].id_dot)), //номер дочерней папки в меню
+                s = 6;//(uint8_t)pgm_read_word(&(MStruct[m].f_num)) ;  //кол-во файлов в папке
+ while (i < ((s < PX/*4*/) ? s : PX/*4*/))
+    {if (s<(t+i))y=t+i-s;else y=t+i;
+      myOLED.printNumI(y, 3, 17 + i * 10);
+      myOLED.print(plr(KName,(y-1)), CENTER, 17 + i * 10 );//вызов массива названий для ключей
+      ++i;
+    }
+    myOLED.update();
+}
+///////
+//Распаковщик названий ключей  из строкового массива
+char* plr(char* s, int i)
+{ int n, j,x(0), k;
+  while (b[x]!= '\0')//очистка масива от предыдущей записи
+    {b[x]=0;
+    ++x;
+    }
+  //while(b!=curr)
+  for (n = 0,j=0,k=0; (n < strlen_P(s))&&(i>=j); n++)
+  {
+     if(pgm_read_byte_near(s + n)==' ')j++;
+     if((i==j)&& (pgm_read_byte_near(s + n)!=' '))b[k++]=pgm_read_byte_near(s + n);
+  }
+    return b;
 }
