@@ -15,6 +15,7 @@ extern uint8_t pacman2[];
 extern uint8_t pacman3[];
 
 byte ascii_num(byte a);
+char* plr(char* s, int i, char &arr);
 
 //extern void destr(byte i, int x);
 //extern int constr(byte i);
@@ -25,6 +26,7 @@ void rdm6300_read(OLED &myOLED, volatile Button &button1, volatile Button &butto
   uint8_t* bm;
   int pacy;
   byte num[14]={0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  char Key_name[12];
   //Serial.begin(9600);
   while(1){
   //begin://метка goto
@@ -226,17 +228,17 @@ myOLED.drawRoundRect(1, 15, 127, 26);//Обрамление выделенног
 }
 ///////
 //Распаковщик названий ключей  из строкового массива
-char* plr(char* s, int i)
+char* plr(char* s, int i, char &arr)
 { int n, j,x(0), k;
-  while (b[x]!= '\0')//очистка масива от предыдущей записи
-    {b[x]=0;
+  while (arr[x]!= '\0')//очистка масива от предыдущей записи
+    {arr[x]=0;
     ++x;
     }
-  //while(b!=curr)
+  //-->>
   for (n = 0,j=0,k=0; (n < strlen_P(s))&&(i>=j); n++)
   {
      if(pgm_read_byte_near(s + n)==' ')j++;
-     if((i==j)&& (pgm_read_byte_near(s + n)!=' '))b[k++]=pgm_read_byte_near(s + n);
+     if((i==j)&& (pgm_read_byte_near(s + n)!=' '))arr[k++]=pgm_read_byte_near(s + n);
   }
-    return b;
+    return arr;
 }
